@@ -13,7 +13,7 @@ import com.lilithsthrone.game.character.npc.misc.Elemental;
 import com.lilithsthrone.game.character.npc.submission.ImpAttacker;
 import com.lilithsthrone.game.character.race.Subspecies;
 import com.lilithsthrone.game.dialogue.DialogueNode;
-import com.lilithsthrone.game.dialogue.npcDialogue.SlaveDialogue;
+import com.lilithsthrone.game.dialogue.companions.SlaveDialogue;
 import com.lilithsthrone.game.dialogue.responses.Response;
 import com.lilithsthrone.game.dialogue.responses.ResponseCombat;
 import com.lilithsthrone.game.dialogue.responses.ResponseEffectsOnly;
@@ -93,15 +93,15 @@ public class TunnelImpsDialogue {
 		if(isCompanionDialogue()) {
 			idSB.append("Companions");
 		}
-		if(Main.game.getPlayer().getLocationPlace().getPlaceType()==PlaceType.SUBMISSION_IMP_TUNNELS_ALPHA) {
+		if(Main.game.getPlayer().getLocationPlace().getPlaceType().equals(PlaceType.SUBMISSION_IMP_TUNNELS_ALPHA)) {
 			// Alpha imp group encounter:
 			idSB.append("Alpha");
 			
-		} else if(Main.game.getPlayer().getLocationPlace().getPlaceType()==PlaceType.SUBMISSION_IMP_TUNNELS_DEMON) {
+		} else if(Main.game.getPlayer().getLocationPlace().getPlaceType().equals(PlaceType.SUBMISSION_IMP_TUNNELS_DEMON)) {
 			// Demon group encounter:
 			idSB.append("Demon");
 			
-		} else if(Main.game.getPlayer().getLocationPlace().getPlaceType()==PlaceType.SUBMISSION_IMP_TUNNELS_FEMALES) {
+		} else if(Main.game.getPlayer().getLocationPlace().getPlaceType().equals(PlaceType.SUBMISSION_IMP_TUNNELS_FEMALES)) {
 			// Female imps encounter:
 			idSB.append("Females");
 			
@@ -242,6 +242,9 @@ public class TunnelImpsDialogue {
 		public Response getResponse(int responseTab, int index) {
 			if(potion != null) {
 				if (index == 1) {
+					if(Main.game.isSpittingDisabled()) {
+						return Response.getDisallowedSpittingResponse();
+					}
 					if(Main.game.getPlayer().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)) {
 						return new Response("Spit",
 								"Due to your <b style='color:"+Colour.FETISH.toWebHexString()+";'>"+Fetish.FETISH_TRANSFORMATION_RECEIVING.getName(Main.game.getPlayer())
@@ -314,6 +317,9 @@ public class TunnelImpsDialogue {
 		public Response getResponse(int responseTab, int index) {
 			if(companionPotion != null) {
 				if (index == 1) {
+					if(Main.game.isSpittingDisabled()) {
+						return Response.getDisallowedSpittingResponse();
+					}
 					return new Response("Order spit",
 							UtilText.parse(getMainCompanion(), "Tell [npc.name] to spit out the potion the imps are trying to force [npc.herHim] to drink."
 									+ (getMainCompanion().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)
@@ -416,6 +422,9 @@ public class TunnelImpsDialogue {
 				Util.Value<String, AbstractItem> companionPotion = getImpLeader().getTransformativePotion(getMainCompanion(), false);
 				
 				if (index == 1) {
+					if(Main.game.isSpittingDisabled()) {
+						return Response.getDisallowedSpittingResponse();
+					}
 					if(Main.game.getPlayer().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)) {
 						return new Response("Spit",
 									"Due to your <b style='color:"+Colour.FETISH.toWebHexString()+";'>"+Fetish.FETISH_TRANSFORMATION_RECEIVING.getName(Main.game.getPlayer())
@@ -505,6 +514,9 @@ public class TunnelImpsDialogue {
 					};
 					
 				} else if (index == 6) {
+					if(Main.game.isSpittingDisabled()) {
+						return Response.getDisallowedSpittingResponse("Spit (both)");
+					}
 					if(Main.game.getPlayer().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)) {
 						return new Response("Spit (both)",
 								UtilText.parse(getMainCompanion(),
@@ -612,6 +624,9 @@ public class TunnelImpsDialogue {
 				Util.Value<String, AbstractItem> potion = getImpLeader().getTransformativePotion(Main.game.getPlayer(), false);
 				
 				if (index == 1) {
+					if(Main.game.isSpittingDisabled()) {
+						return Response.getDisallowedSpittingResponse();
+					};
 					if(Main.game.getPlayer().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)) {
 						return new Response("Spit",
 								"Due to your <b style='color:"+Colour.FETISH.toWebHexString()+";'>"+Fetish.FETISH_TRANSFORMATION_RECEIVING.getName(Main.game.getPlayer())
@@ -664,6 +679,9 @@ public class TunnelImpsDialogue {
 							null);
 					
 				}  else if (index == 7) {
+					if(Main.game.isSpittingDisabled()) {
+						return Response.getDisallowedSpittingResponse("Spit (both)");
+					}
 					return new Response("Spit (both)",
 							UtilText.parse(getMainCompanion(), "As the imps are unable to access [npc.namePos] mouth, they are not attempting to force [npc.herHim] to drink their transformative potion."),
 							null);
@@ -680,6 +698,9 @@ public class TunnelImpsDialogue {
 					return new Response("Swallow", UtilText.parse(getMainCompanion(),"As the imps cannot gain access to your mouth, they are ignoring you and focusing on transforming [npc.name]!"), null);
 					
 				} else if (index == 6) {
+					if(Main.game.isSpittingDisabled()) {
+						return Response.getDisallowedSpittingResponse("Order spit");
+					}
 					return new Response("Order spit",
 							UtilText.parse(getMainCompanion(), "Tell [npc.name] to spit out the potion the imps are trying to force [npc.herHim] to drink."
 									+ (getMainCompanion().hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING)
@@ -845,7 +866,8 @@ public class TunnelImpsDialogue {
 								Main.game.getPlayer().getParty(),
 								null,
 								null,
-								AFTER_SEX_DEFEAT, UtilText.parseFromXMLFile("encounters/submission/impAttack"+getImpEncounterId(), "IMP_ATTACK_COMBAT_VICTORY_SEX_SUBMIT", getAllCharacters()));
+								AFTER_SEX_DEFEAT,
+								UtilText.parseFromXMLFile("encounters/submission/impAttack"+getImpEncounterId(), "IMP_ATTACK_COMBAT_VICTORY_SEX_SUBMIT", getAllCharacters()));
 					}
 					
 				} else if(responseTab == 1) {
@@ -1117,7 +1139,8 @@ public class TunnelImpsDialogue {
 						Util.newArrayListOfValues(getMainCompanion()),
 						null,
 						Util.newArrayListOfValues(Main.game.getPlayer()),
-						AFTER_SEX_WATCHING_COMPANION, UtilText.parseFromXMLFile("encounters/submission/impAttack"+getImpEncounterId(), "IMP_ATTACK_OFFER_COMPANION_START_SEX", getAllCharacters()));
+						AFTER_SEX_WATCHING_COMPANION,
+						UtilText.parseFromXMLFile("encounters/submission/impAttack"+getImpEncounterId(), "IMP_ATTACK_OFFER_COMPANION_START_SEX", getAllCharacters()));
 			} else {
 				return null;
 			}

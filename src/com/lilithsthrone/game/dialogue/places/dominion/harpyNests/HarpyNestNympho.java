@@ -1,6 +1,5 @@
 package com.lilithsthrone.game.dialogue.places.dominion.harpyNests;
 
-import com.lilithsthrone.game.Weather;
 import com.lilithsthrone.game.character.body.valueEnums.Femininity;
 import com.lilithsthrone.game.character.effects.Perk;
 import com.lilithsthrone.game.character.fetishes.Fetish;
@@ -21,6 +20,7 @@ import com.lilithsthrone.game.sex.SexAreaOrifice;
 import com.lilithsthrone.game.sex.managers.universal.SMGeneric;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
+import com.lilithsthrone.world.Weather;
 
 /**
  * @since 0.1.8
@@ -366,7 +366,7 @@ public class HarpyNestNympho {
 		public String getContent() {
 			return "<p>"
 						+ "[pc.speech(What I want,)] you say,"
-						+ " [pc.speech(is for you to get your nest under control. The enforcers are struggling to keep the peace, and it's members of your nest who are responsible!)]"
+						+ " [pc.speech(is for you to get your nest under control. The Enforcers are struggling to keep the peace, and it's members of your nest who are responsible!)]"
 					+ "</p>"
 					+ "<p>"
 						+ "[harpyNympho.speech(Well it's not <i>my</i> fault if some of my playthings want to have a bit of extra fun elsewhere!)] [harpyNympho.name] replies."
@@ -667,6 +667,9 @@ public class HarpyNestNympho {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
+				if(Main.game.isSpittingDisabled()) {
+					return Response.getDisallowedSpittingResponse("Lips sealed");
+				}
 				return new Response("Lips sealed", "Don't let [harpyNympho.Name] get that strange lollipop into your mouth...", HARPY_NEST_NYMPHO_FIGHT_LOSE_PUNISHMENT_NO_TF);
 					
 			} else if (index == 2) {
@@ -777,6 +780,9 @@ public class HarpyNestNympho {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
+				if(Main.game.isSpittingDisabled()) {
+					return Response.getDisallowedSpittingResponse("Lips sealed");
+				}
 				return new Response("Lips sealed", "Don't let [harpyNympho.Name] get that strange lollipop into your mouth...", HARPY_NEST_NYMPHO_FIGHT_LOSE_PUNISHMENT_NO_TF);
 					
 			} else if (index == 2) {
@@ -1020,9 +1026,9 @@ public class HarpyNestNympho {
 		
 		@Override
 		public String getContent() {
-			if(Sex.getNumberOfOrgasms(Sex.getActivePartner()) >= 1) {
+			if(Sex.getNumberOfOrgasms(Main.game.getNpc(HarpyNympho.class)) >= Main.game.getNpc(HarpyNympho.class).getOrgasmsBeforeSatisfied()) {
 				return "<p>"
-							+ "As you step back from [harpyNympho.name], she sinks to the floor, totally worn out from her orgasm"+(Sex.getNumberOfOrgasms(Sex.getActivePartner()) > 1?"s":"")+"."
+							+ "As you step back from [harpyNympho.name], she sinks to the floor, totally worn out from her orgasm"+(Sex.getNumberOfOrgasms(Main.game.getNpc(HarpyNympho.class)) > 1?"s":"")+"."
 							+ " The surrounding harpies, having watched the whole thing, kneel in submission as you finish with their matriarch."
 						+ "</p>";
 			} else {

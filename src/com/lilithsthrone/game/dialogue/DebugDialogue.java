@@ -1,10 +1,11 @@
 package com.lilithsthrone.game.dialogue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.lilithsthrone.game.PropertyValue;
-import com.lilithsthrone.game.Weather;
 import com.lilithsthrone.game.character.CharacterUtils;
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.attributes.Attribute;
@@ -22,9 +23,7 @@ import com.lilithsthrone.game.character.quests.QuestLine;
 import com.lilithsthrone.game.character.race.RaceStage;
 import com.lilithsthrone.game.character.race.Subspecies;
 import com.lilithsthrone.game.combat.SpellSchool;
-import com.lilithsthrone.game.dialogue.npcDialogue.unique.LumiDialogue;
 import com.lilithsthrone.game.dialogue.responses.Response;
-import com.lilithsthrone.game.dialogue.responses.ResponseEffectsOnly;
 import com.lilithsthrone.game.dialogue.responses.ResponseSex;
 import com.lilithsthrone.game.dialogue.utils.BodyChanging;
 import com.lilithsthrone.game.dialogue.utils.ParserCommand;
@@ -47,7 +46,6 @@ import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.BaseColour;
 import com.lilithsthrone.utils.Colour;
 import com.lilithsthrone.utils.Util;
-import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.1.0
@@ -89,6 +87,9 @@ public class DebugDialogue {
 				
 			} else if(index == 2) {
 				return "Misc.";
+
+			} else if(index == 3) {
+				return "Item view";
 				
 			}
 			return null;
@@ -149,10 +150,7 @@ public class DebugDialogue {
 						}
 					};
 					
-				} else if(index==5 && Main.DEBUG) {
-					return new Response("All items", "View icons of all the clothing, weapon, and items in the game. <i>Warning: Very sluggish and slow to load.</i>", ALL_ITEMS_VIEW);
-					
-				}  else if (index == 6) {
+				} else if (index == 6) {
 					return new Response("Spawn Menu", "View the clothing, weapon, and item spawn menu.", SPAWN_MENU);
 					
 				} else if (index == 7) {
@@ -170,10 +168,10 @@ public class DebugDialogue {
 					return new Response("Race resets", "View the race reset options.", BODY_PART_RACE_RESET);
 					
 				} else if (index == 11) {
-					return new Response(UtilText.formatAsMoney(10000, "span"), "Add 10000 flames.", DEBUG_MENU){
+					return new Response(UtilText.formatAsMoney(100_000, "span"), "Add 100,000 flames.", DEBUG_MENU){
 						@Override
 						public void effects() {
-							Main.game.getPlayer().incrementMoney(10000);
+							Main.game.getPlayer().incrementMoney(100_000);
 						}
 					};
 					
@@ -186,6 +184,9 @@ public class DebugDialogue {
 							}
 						}
 					};
+					
+				}else if (index == 13) {
+					return new Response("Very long action text for testing", "Very long action text for testing.", null);
 					
 				}
 				
@@ -322,24 +323,26 @@ public class DebugDialogue {
 							}
 						};
 						
-				}  else if (index == 5) {
-					if(Main.game.getPlayer().getLocationPlace().getPlaceType()!=PlaceType.DOMINION_BACK_ALLEYS) {
-						return new Response("Lumi test", "Lumi can only be spawned in alleyway tiles.", null);
-						
-					} else if(!Main.game.getNonCompanionCharactersPresent().isEmpty()) {
-						return new Response("Lumi test", "Lumi can only be spawned into empty tiles!", null);
-						
-					}  else if(Main.game.getCurrentWeather()==Weather.MAGIC_STORM) {
-						return new Response("Lumi test", "Lumi can not be spawned during an arcane storm.", null);
-					}
-					return new ResponseEffectsOnly("Lumi test", "Spawn Lumi to test her dialogue and scenes."){
-						@Override
-						public void effects() {
-							Main.game.setContent(new Response("", "", LumiDialogue.LUMI_APPEARS));
-						}
-					};
-					
-				} else if (index == 6) {
+				}
+//				else if (index == 5) {
+//					if(!Main.game.getPlayer().getLocationPlace().getPlaceType().equals(PlaceType.DOMINION_BACK_ALLEYS)) {
+//						return new Response("Lumi test", "Lumi can only be spawned in alleyway tiles.", null);
+//						
+//					} else if(!Main.game.getNonCompanionCharactersPresent().isEmpty()) {
+//						return new Response("Lumi test", "Lumi can only be spawned into empty tiles!", null);
+//						
+//					}  else if(Main.game.getCurrentWeather()==Weather.MAGIC_STORM) {
+//						return new Response("Lumi test", "Lumi can not be spawned during an arcane storm.", null);
+//					}
+//					return new ResponseEffectsOnly("Lumi test", "Spawn Lumi to test her dialogue and scenes."){
+//						@Override
+//						public void effects() {
+//							Main.game.setContent(new Response("", "", LumiDialogue.LUMI_APPEARS));
+//						}
+//					};
+//					
+//				} 
+				else if (index == 6) {
 					return new Response("Brax's revenge", "Brax cums in your vagina!", DEBUG_MENU){
 						@Override
 						public void effects() {
@@ -411,6 +414,73 @@ public class DebugDialogue {
 						}
 					};
 				}
+				
+			} else if(responseTab == 3) {
+				if(index==1) {
+					return new Response("All",
+							"View icons and ids of all the clothing, weapons, and items in the game. You can also spawn these items by clicking on their icons. <i>Warning: Very sluggish and slow to load.</i>",
+							ITEM_VIEWER) {
+						@Override
+						public void effects() {
+							viewItemVariablesReset();
+							viewAll = true;
+						}
+					};
+					
+				} else if(index==2) {
+					return new Response("Items",
+							"View icons and ids of all the items in the game. You can also spawn these items by clicking on their icons. <i>Warning: Very sluggish and slow to load.</i>",
+							ITEM_VIEWER) {
+						@Override
+						public void effects() {
+							viewItemVariablesReset();
+						}
+					};
+					
+				} else if(index==3) {
+					return new Response("Weapons",
+							"View icons and ids of all the weapons in the game. You can also spawn these items by clicking on their icons. <i>Warning: May be very sluggish and slow to load.</i>",
+							ITEM_VIEWER) {
+						@Override
+						public void effects() {
+							viewItemVariablesReset();
+							itemViewSlot = InventorySlot.WEAPON_MAIN_1;
+						}
+					};
+					
+				} else if(index==4) {
+					return new Response("All clothing",
+							"View icons and ids of all the clothing in the game. You can also spawn these items by clicking on their icons. <i>Warning: Very sluggish and slow to load.</i>",
+							ITEM_VIEWER) {
+						@Override
+						public void effects() {
+							viewItemVariablesReset();
+							viewAllClothing = true;
+						}
+					};
+					
+				} else {
+					List<InventorySlot> clothingSlots = new ArrayList<>(Arrays.asList(InventorySlot.values()));
+					clothingSlots.remove(InventorySlot.WEAPON_MAIN_1);
+					clothingSlots.remove(InventorySlot.WEAPON_MAIN_2);
+					clothingSlots.remove(InventorySlot.WEAPON_MAIN_3);
+					clothingSlots.remove(InventorySlot.WEAPON_OFFHAND_1);
+					clothingSlots.remove(InventorySlot.WEAPON_OFFHAND_2);
+					clothingSlots.remove(InventorySlot.WEAPON_OFFHAND_3);
+					
+					if(index-5 < clothingSlots.size()) {
+						InventorySlot is = clothingSlots.get(index-5);
+						return new Response(Util.capitaliseSentence(is.getName()),
+								"View icons and ids of all the clothing in the the slot '"+is.getName()+"'. You can also spawn these items by clicking on their icons. <i>Warning: May be very sluggish and slow to load.</i>",
+								ITEM_VIEWER) {
+							@Override
+							public void effects() {
+								viewItemVariablesReset();
+								itemViewSlot = is;
+							}
+						};
+					}
+				}
 			}
 			
 			return null;
@@ -443,15 +513,16 @@ public class DebugDialogue {
 		public String getContent() {
 			UtilText.nodeContentSB.setLength(0);
 			
-			for(NPC npc : Main.game.getOffspring()) {
-				if(npc.isFeminine()) {
-					UtilText.nodeContentSB.append(npc.getName(true)+" "+npc.getMother().getName(true)+"'s daughter ("+npc.getSubspecies().getName(npc)+") Father:"+npc.getFather().getName(true)+" Mother:"+npc.getMother().getName(true)+"<br/>");
-				} else {
-					UtilText.nodeContentSB.append(npc.getName(true)+" "+npc.getFather().getName(true)+"'s son ("+npc.getSubspecies().getName(npc)+") Father:"+npc.getFather().getName(true)+" Mother:"+npc.getMother().getName(true)+"<br/>");
+			for(NPC npc : Main.game.getOffspring(true)) {
+				boolean isBorn = true;
+				if(npc.getMother().getPregnantLitter()!=null && npc.getMother().getPregnantLitter().getOffspring().contains(npc.getId())) {
+					isBorn = false;
 				}
+				UtilText.nodeContentSB.append((isBorn?"":"(Not born yet) ")+"<span style='color:"+npc.getFemininity().getColour().toWebHexString()+";'>"+npc.getName(true)+"</span> ("+npc.getSubspecies().getName(npc)+")"
+						+ " M:"+npc.getMother().getName(true)+" F:"+npc.getFather().getName(true)+"<br/>");
 			}
 			if(activeOffspring!=null) {
-				for(Fetish f : activeOffspring.getFetishes()) {
+				for(Fetish f : activeOffspring.getFetishes(true)) {
 					UtilText.nodeContentSB.append("<br/>[style.boldSex(Fetish:)] "+f.getName(activeOffspring));
 				}
 				UtilText.nodeContentSB.append(
@@ -467,11 +538,11 @@ public class DebugDialogue {
 			if (index == 0) {
 				return new Response("Back", "", DEBUG_MENU);
 				
-			} else if(index-1 < Main.game.getOffspring().size()) {
-				return new Response(Main.game.getOffspring().get(index-1).getName(true), "View the character page for this offspring.", OFFSPRING) {
+			} else if(index-1 < Main.game.getOffspring(true).size()) {
+				return new Response(Main.game.getOffspring(true).get(index-1).getName(true), "View the character page for this offspring.", OFFSPRING) {
 					@Override
 					public void effects() {
-						activeOffspring = Main.game.getOffspring().get(index-1);
+						activeOffspring = Main.game.getOffspring(true).get(index-1);
 						for(CoverableArea ca : CoverableArea.values()) {
 							activeOffspring.setAreaKnownByCharacter(ca, Main.game.getPlayer(), true);
 						}
@@ -492,13 +563,13 @@ public class DebugDialogue {
 	public static List<AbstractWeaponType> weaponsTotal = new ArrayList<>();
 	static {
 		clothingTotal.addAll(ClothingType.getAllClothing());
-		clothingTotal.removeIf((c) -> c.getItemTags().contains(ItemTag.REMOVE_FROM_DEBUG_SPAWNER));
+		clothingTotal.removeIf((c) -> c.getDefaultItemTags().contains(ItemTag.REMOVE_FROM_DEBUG_SPAWNER) || c.getDefaultItemTags().contains(ItemTag.HIDDEN_IN_DEBUG_SPAWNER));
 		
-		weaponsTotal.addAll(WeaponType.getAllweapons());
-		weaponsTotal.removeIf((w) -> w.getItemTags().contains(ItemTag.REMOVE_FROM_DEBUG_SPAWNER));
+		weaponsTotal.addAll(WeaponType.getAllWeapons());
+		weaponsTotal.removeIf((w) -> w.getItemTags().contains(ItemTag.REMOVE_FROM_DEBUG_SPAWNER) || w.getItemTags().contains(ItemTag.HIDDEN_IN_DEBUG_SPAWNER));
 
 		itemsTotal.addAll(ItemType.getAllItems());
-		itemsTotal.removeIf((i) -> i.getItemTags().contains(ItemTag.REMOVE_FROM_DEBUG_SPAWNER));
+		itemsTotal.removeIf((i) -> i.getItemTags().contains(ItemTag.REMOVE_FROM_DEBUG_SPAWNER) || i.getItemTags().contains(ItemTag.HIDDEN_IN_DEBUG_SPAWNER));
 		
 	}
 	private static StringBuilder inventorySB = new StringBuilder();
@@ -512,16 +583,55 @@ public class DebugDialogue {
 
 			inventorySB.append(
 					"<p style='width:100%; text-align:center; padding:0 margin:0;'>"
-						+ (activeSlot==null ?
-								"<b style='color:"+Colour.BASE_BLUE_LIGHT.toWebHexString()+";'>Spawn Item</b>"
-								:(activeSlot == InventorySlot.WEAPON_MAIN || activeSlot == InventorySlot.WEAPON_OFFHAND
-									? "<b style='color:"+Colour.BASE_RED_LIGHT.toWebHexString()+";'>Spawn Weapon</b> ("+Util.capitaliseSentence(activeSlot.getName())+")"
-									: "<b style='color:"+Colour.BASE_YELLOW_LIGHT.toWebHexString()+";'>Spawn Clothing</b> ("+Util.capitaliseSentence(activeSlot.getName())+")"))
+						+ (itemTag==ItemTag.HIDDEN_IN_DEBUG_SPAWNER
+							?"[style.boldExcellent(Hidden Spawn Menu)]"
+							:(activeSlot==null
+								?"<b style='color:"+Colour.BASE_BLUE_LIGHT.toWebHexString()+";'>Spawn Item</b>"
+								:(activeSlot.isWeapon()
+									? "<b style='color:"+Colour.BASE_RED_LIGHT.toWebHexString()+";'>Spawn Weapon</b> ("+Util.capitaliseSentence(activeSlot==InventorySlot.WEAPON_MAIN_1?"Melee":"Ranged")+")"
+									: "<b style='color:"+Colour.BASE_YELLOW_LIGHT.toWebHexString()+";'>Spawn Clothing</b> ("+Util.capitaliseSentence(activeSlot.getName())+")")))
 					+"</p>");
 			
 			int count=0;
 			inventorySB.append("<div class='inventory-not-equipped'>");
-			if(activeSlot == null) {
+			if(itemTag==ItemTag.HIDDEN_IN_DEBUG_SPAWNER) {
+				for(AbstractClothingType c : ClothingType.getAllClothing()) {
+					if(c.getDefaultItemTags().contains(ItemTag.HIDDEN_IN_DEBUG_SPAWNER)) {
+						inventorySB.append("<div class='inventory-item-slot unequipped' style='background-color:"+c.getRarity().getBackgroundColour().toWebHexString()+";'>"
+								+ "<div class='inventory-icon-content'>"
+									+c.getSVGImage(
+											c.getEquipSlots().get(0),
+											c.getAvailablePrimaryColours().get(0),
+											c.getAvailableSecondaryColours().isEmpty()?null:c.getAvailableSecondaryColours().get(0),
+											c.getAvailableTertiaryColours().isEmpty()?null:c.getAvailableTertiaryColours().get(0),
+											null, null, null, null)
+								+"</div>"
+								+ "<div class='overlay' id='" + c.getId() + "_SPAWN'></div>"
+							+ "</div>");
+					}
+				}
+				for(AbstractWeaponType weaponType : WeaponType.getAllWeapons()) {
+					if(weaponType.getItemTags().contains(ItemTag.HIDDEN_IN_DEBUG_SPAWNER)) {
+						inventorySB.append("<div class='inventory-item-slot unequipped' style='background-color:"+weaponType.getRarity().getBackgroundColour().toWebHexString()+";'>"
+								+ "<div class='inventory-icon-content'>"+weaponType.getSVGImage(
+										weaponType.getAvailableDamageTypes().get(0),
+										weaponType.getAvailablePrimaryColours().isEmpty()?null:weaponType.getAvailablePrimaryColours().get(0),
+										weaponType.getAvailableSecondaryColours().isEmpty()?null:weaponType.getAvailableSecondaryColours().get(0))
+								+"</div>"
+								+ "<div class='overlay' id='" + weaponType.getId() + "_SPAWN'></div>"
+							+ "</div>");
+					}
+				}
+				for(AbstractItemType itemType : ItemType.getAllItems()) {
+					if(itemType.getItemTags().contains(ItemTag.HIDDEN_IN_DEBUG_SPAWNER)) {
+						inventorySB.append("<div class='inventory-item-slot unequipped' style='background-color:"+itemType.getRarity().getBackgroundColour().toWebHexString()+";'>"
+								+ "<div class='inventory-icon-content'>"+itemType.getSVGString()+"</div>"
+								+ "<div class='overlay' id='" + itemType.getId() + "_SPAWN'></div>"
+							+ "</div>");
+					}
+				}
+				
+			} else if(activeSlot == null) {
 				for(AbstractItemType itemType : itemsTotal) {
 					if((itemTag==null
 							&& (!itemType.getItemTags().contains(ItemTag.BOOK)
@@ -531,7 +641,7 @@ public class DebugDialogue {
 							|| (itemTag!=null
 								&& (itemType.getItemTags().contains(itemTag)
 										|| (itemTag==ItemTag.SPELL_BOOK && itemType.getItemTags().contains(ItemTag.SPELL_SCROLL))))) {
-						inventorySB.append("<div class='inventory-item-slot unequipped "+ itemType.getRarity().getName() + "'>"
+						inventorySB.append("<div class='inventory-item-slot unequipped' style='background-color:"+itemType.getRarity().getBackgroundColour().toWebHexString()+";'>"
 												+ "<div class='inventory-icon-content'>"+itemType.getSVGString()+"</div>"
 												+ "<div class='overlay' id='" + itemType.getId() + "_SPAWN'></div>"
 											+ "</div>");
@@ -539,11 +649,11 @@ public class DebugDialogue {
 					count++;
 				}
 				
-			} else if(activeSlot == InventorySlot.WEAPON_MAIN || activeSlot == InventorySlot.WEAPON_OFFHAND) {
+			} else if(activeSlot.isWeapon()) {
 				for(AbstractWeaponType weaponType : weaponsTotal) {
-					if((weaponType.isMelee() && activeSlot==InventorySlot.WEAPON_MAIN)
-							|| (!weaponType.isMelee() && activeSlot==InventorySlot.WEAPON_OFFHAND)) {
-						inventorySB.append("<div class='inventory-item-slot unequipped "+ weaponType.getRarity().getName() + "'>"
+					if((weaponType.isMelee() && activeSlot==InventorySlot.WEAPON_MAIN_1)
+							|| (!weaponType.isMelee() && activeSlot==InventorySlot.WEAPON_OFFHAND_1)) {
+						inventorySB.append("<div class='inventory-item-slot unequipped' style='background-color:"+weaponType.getRarity().getBackgroundColour().toWebHexString()+";'>"
 												+ "<div class='inventory-icon-content'>"+weaponType.getSVGImage(
 														weaponType.getAvailableDamageTypes().get(0),
 														weaponType.getAvailablePrimaryColours().isEmpty()?null:weaponType.getAvailablePrimaryColours().get(0),
@@ -557,14 +667,15 @@ public class DebugDialogue {
 				
 			} else {
 				for(AbstractClothingType clothingType : clothingTotal) {
-					if(clothingType.getSlot()==activeSlot) {
-						inventorySB.append("<div class='inventory-item-slot unequipped "+ clothingType.getRarity().getName() + "'>"
+					if(clothingType.getEquipSlots().contains(activeSlot)) {
+						inventorySB.append("<div class='inventory-item-slot unequipped' style='background-color:"+clothingType.getRarity().getBackgroundColour().toWebHexString()+";'>"
 												+ "<div class='inventory-icon-content'>"
 													+clothingType.getSVGImage(
-														clothingType.getAllAvailablePrimaryColours().get(0),
-														clothingType.getAvailableSecondaryColours().isEmpty()?null:clothingType.getAvailableSecondaryColours().get(0),
-														clothingType.getAvailableTertiaryColours().isEmpty()?null:clothingType.getAvailableTertiaryColours().get(0),
-														null, null, null, null)
+															clothingType.getEquipSlots().get(0),
+															clothingType.getAvailablePrimaryColours().get(0),
+															clothingType.getAvailableSecondaryColours().isEmpty()?null:clothingType.getAvailableSecondaryColours().get(0),
+															clothingType.getAvailableTertiaryColours().isEmpty()?null:clothingType.getAvailableTertiaryColours().get(0),
+															null, null, null, null)
 												+"</div>"
 												+ "<div class='overlay' id='" + clothingType.getId() + "_SPAWN'></div>"
 											+ "</div>");
@@ -582,19 +693,25 @@ public class DebugDialogue {
 			
 			inventorySB.append("<div class='container-half-width'>");
 			for(InventorySlot slot : InventorySlot.values()) {
-				inventorySB.append("<div class='normal-button' id='"+slot+"_SPAWN_SELECT' style='width:18%; margin:1%; padding:2px; font-size:0.9em; color:"
-						+ (slot == InventorySlot.WEAPON_MAIN || slot == InventorySlot.WEAPON_OFFHAND ? Colour.BASE_RED_LIGHT.toWebHexString() : Colour.BASE_YELLOW_LIGHT.toWebHexString())+";'>"
-						+(slot == InventorySlot.WEAPON_MAIN
-							?"Melee"
-							:(slot == InventorySlot.WEAPON_OFFHAND
-									?"Ranged"
-									:Util.capitaliseSentence(slot.getName())))
-						+"</div>");
+				if(slot!=InventorySlot.WEAPON_MAIN_2
+						&& slot!=InventorySlot.WEAPON_MAIN_3
+						&& slot!=InventorySlot.WEAPON_OFFHAND_2
+						&& slot!=InventorySlot.WEAPON_OFFHAND_3) {
+					inventorySB.append("<div class='normal-button' id='"+slot+"_SPAWN_SELECT' style='width:18%; margin:1%; padding:2px; font-size:0.9em; color:"
+							+ (slot.isWeapon() ? Colour.BASE_RED_LIGHT.toWebHexString() : Colour.BASE_YELLOW_LIGHT.toWebHexString())+";'>"
+							+(slot == InventorySlot.WEAPON_MAIN_1
+								?"Melee"
+								:(slot == InventorySlot.WEAPON_OFFHAND_1
+										?"Ranged"
+										:Util.capitaliseSentence(slot.getName())))
+							+"</div>");
+				}
 			}
 			inventorySB.append("<div class='normal-button' id='ITEM_SPAWN_SELECT' style='width:18%; margin:1%; padding:2px; font-size:0.9em; color:"+Colour.BASE_BLUE_LIGHT.toWebHexString()+";'>Items</div>");
 			inventorySB.append("<div class='normal-button' id='ESSENCE_SPAWN_SELECT' style='width:18%; margin:1%; padding:2px; font-size:0.9em; color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'>Essences</div>");
 			inventorySB.append("<div class='normal-button' id='BOOK_SPAWN_SELECT' style='width:18%; margin:1%; padding:2px; font-size:0.9em; color:"+Colour.BASE_ORANGE.toWebHexString()+";'>Books</div>");
 			inventorySB.append("<div class='normal-button' id='SPELL_SPAWN_SELECT' style='width:18%; margin:1%; padding:2px; font-size:0.9em; color:"+Colour.DAMAGE_TYPE_SPELL.toWebHexString()+";'>Spells</div>");
+			inventorySB.append("<div class='normal-button' id='HIDDEN_SPAWN_SELECT' style='width:18%; margin:1%; padding:2px; opacity:0; cursor:default; font-size:0.9em; color:"+Colour.GENERIC_EXCELLENT.toWebHexString()+";'>Hidden</div>");
 			inventorySB.append("</div>");
 			
 			return inventorySB.toString();
@@ -616,80 +733,118 @@ public class DebugDialogue {
 		}
 	};
 	
-	public static final DialogueNode ALL_ITEMS_VIEW = new DialogueNode("", "", false) {
-
-		@Override
-		public String getHeaderContent() {
-			inventorySB.setLength(0);
-			
-			inventorySB.append(
-					"<p style='width:100%; text-align:center; padding:0 margin:0;'>"
-						+ (activeSlot==null ?
-								"<b style='color:"+Colour.BASE_BLUE_LIGHT.toWebHexString()+";'>Spawn Item</b>"
-								:(activeSlot == InventorySlot.WEAPON_MAIN || activeSlot == InventorySlot.WEAPON_OFFHAND
-									? "<b style='color:"+Colour.BASE_RED_LIGHT.toWebHexString()+";'>Spawn Weapon</b> ("+Util.capitaliseSentence(activeSlot.getName())+")"
-									: "<b style='color:"+Colour.BASE_YELLOW_LIGHT.toWebHexString()+";'>Spawn Clothing</b> ("+Util.capitaliseSentence(activeSlot.getName())+")"))
-					+"</p>");
-			
-			int count=0;
-			inventorySB.append("<div class='inventory-not-equipped'>");
-			for(AbstractItemType itemType : itemsTotal) {
-				if((itemTag==null
-						&& (!itemType.getItemTags().contains(ItemTag.BOOK)
-						&& !itemType.getItemTags().contains(ItemTag.ESSENCE)
-						&& !itemType.getItemTags().contains(ItemTag.SPELL_BOOK)
-						&& !itemType.getItemTags().contains(ItemTag.SPELL_SCROLL)))
-						|| (itemTag!=null
-							&& (itemType.getItemTags().contains(itemTag)
-									|| (itemTag==ItemTag.SPELL_BOOK && itemType.getItemTags().contains(ItemTag.SPELL_SCROLL))))) {
-					inventorySB.append("<div class='inventory-item-slot unequipped "+ itemType.getRarity().getName() + "' style='width:5%'>"
-											+ "<div class='inventory-icon-content'>"+itemType.getSVGString()+"</div>"
-											+ "<div class='overlay' id='" + itemType.getId() + "_SPAWN'></div>"
-										+ "</div>");
-				}
-				count++;
-			}
-			
-			for(AbstractWeaponType weaponType : weaponsTotal) {
-				inventorySB.append("<div class='inventory-item-slot unequipped "+ weaponType.getRarity().getName() + "' style='width:5%'>"
-										+ "<div class='inventory-icon-content'>"+weaponType.getSVGImage(
-												weaponType.getAvailableDamageTypes().get(0),
-												weaponType.getAvailablePrimaryColours().isEmpty()?null:Util.randomItemFrom(weaponType.getAvailablePrimaryColours()),
-												weaponType.getAvailableSecondaryColours().isEmpty()?null:Util.randomItemFrom(weaponType.getAvailableSecondaryColours()))
-										+"</div>"
-										+ "<div class='overlay' id='" + weaponType.getId() + "_SPAWN'></div>"
-									+ "</div>");
-				count++;
-			}
-			
-			System.out.println(clothingTotal.size());
-			for(AbstractClothingType clothingType : clothingTotal) {
-				inventorySB.append("<div class='inventory-item-slot unequipped "+ clothingType.getRarity().getName() + "' style='width:5%'>"
-										+ "<div class='inventory-icon-content'>"
-											+clothingType.getSVGImage(
-												Util.randomItemFrom(clothingType.getAvailablePrimaryColours()),
-												clothingType.getAvailableSecondaryColours().isEmpty()?null:Util.randomItemFrom(clothingType.getAvailableSecondaryColours()),
-												clothingType.getAvailableTertiaryColours().isEmpty()?null:Util.randomItemFrom(clothingType.getAvailableTertiaryColours()),
-												null, null, null, null)
-										+"</div>"
-										+ "<div class='overlay' id='" + clothingType.getId() + "_SPAWN'></div>"
-									+ "</div>");
-				count++;
-			}
-			
-			// Fill space:
-			for (int i = count; i <48; i++) {
-				inventorySB.append("<div class='inventory-item-slot unequipped'></div>");
-			}
-			inventorySB.append("</div>");
-			
-			
-			return inventorySB.toString();
-		}
+	private static void viewItemVariablesReset() {
+		viewAll = false;
+		viewAllClothing = false;
+		itemViewSlot = null;
+	}
+	
+	private static boolean viewAll = false;
+	private static boolean viewAllClothing = false;
+	private static InventorySlot itemViewSlot = null;
+	
+	public static final DialogueNode ITEM_VIEWER = new DialogueNode("", "", false) {
 
 		@Override
 		public String getContent() {
-			return "";
+			inventorySB.setLength(0);
+			
+			int width = 33;
+			if(Main.primaryStage.getWidth()>=1900) {
+				width = 25;
+			}
+			int imgWidth = 15;
+			
+			if(!viewAllClothing && (viewAll || itemViewSlot == null)) {
+				inventorySB.append("<div class='inventory-not-equipped' style='-webkit-user-select:auto;'>"
+						+ "<h5>Total items: "+itemsTotal.size()+"</h5>");
+				for(AbstractItemType itemType : itemsTotal) {
+					if((itemTag==null
+							&& (!itemType.getItemTags().contains(ItemTag.BOOK)
+							&& !itemType.getItemTags().contains(ItemTag.ESSENCE)
+							&& !itemType.getItemTags().contains(ItemTag.SPELL_BOOK)
+							&& !itemType.getItemTags().contains(ItemTag.SPELL_SCROLL)))
+							|| (itemTag!=null
+								&& (itemType.getItemTags().contains(itemTag)
+										|| (itemTag==ItemTag.SPELL_BOOK && itemType.getItemTags().contains(ItemTag.SPELL_SCROLL))))) {
+						inventorySB.append("<div class='container-full-width' style='width:"+width+"%; white-space: nowrap; word-wrap: break-word; font-size:0.75em; -webkit-user-select:auto; padding:0; margin:0;'>"
+												+ "<div class='inventory-item-slot unequipped' style='width:"+imgWidth+"%; box-sizing: border-box; padding:0; margin:0; background-color:"+itemType.getRarity().getBackgroundColour().toWebHexString()+";'>"
+													+ "<div class='inventory-icon-content'>"+itemType.getSVGString()+"</div>"
+													+ "<div class='overlay' id='" + itemType.getId() + "_SPAWN'></div>"
+												+ "</div>"
+												+ ItemType.getItemToIdMap().get(itemType)
+											+ "</div>");
+					}
+				}
+				inventorySB.append("</div>");
+			}
+
+			if(viewAll || (itemViewSlot!=null && itemViewSlot.isWeapon())) {
+				inventorySB.append("<div class='inventory-not-equipped' style='-webkit-user-select:auto;'>"
+						+ "<h5>Total weapons: "+weaponsTotal.size()+"</h5>");
+				for(AbstractWeaponType weaponType : weaponsTotal) {
+					inventorySB.append("<div class='container-full-width' style='width:"+width+"%; white-space: nowrap; word-wrap: break-word; font-size:0.75em; -webkit-user-select:auto; padding:0; margin:0;'>"
+											+ "<div class='inventory-item-slot unequipped' style='width:"+imgWidth+"%; box-sizing: border-box; padding:0; margin:0; background-color:"+weaponType.getRarity().getBackgroundColour().toWebHexString()+";'>"
+												+ "<div class='inventory-icon-content'>"+weaponType.getSVGImage(
+														weaponType.getAvailableDamageTypes().get(0),
+														weaponType.getAvailablePrimaryColours().isEmpty()?null:Util.randomItemFrom(weaponType.getAvailablePrimaryColours()),
+														weaponType.getAvailableSecondaryColours().isEmpty()?null:Util.randomItemFrom(weaponType.getAvailableSecondaryColours()))
+												+"</div>"
+												+ "<div class='overlay' id='" + weaponType.getId() + "_SPAWN'></div>"
+											+ "</div>"
+											+ WeaponType.getIdFromWeaponType(weaponType)
+										+ "</div>");
+				}
+				inventorySB.append("</div>");
+			}
+
+			if(viewAll || viewAllClothing) {
+				inventorySB.append("<div class='inventory-not-equipped' style='-webkit-user-select:auto;'>"
+						+ "<h5>Total clothing: "+clothingTotal.size()+"</h5>");
+				for(AbstractClothingType clothingType : clothingTotal) {
+					inventorySB.append("<div class='container-full-width' style='width:"+width+"%; white-space: nowrap; word-wrap: break-word; font-size:0.75em; -webkit-user-select:auto; padding:0; margin:0;'>"
+										+ "<div class='inventory-item-slot unequipped' style='width:"+imgWidth+"%; box-sizing: border-box; padding:0; margin:0; background-color:"+clothingType.getRarity().getBackgroundColour().toWebHexString()+";'>"
+											+ "<div class='inventory-icon-content'>"
+												+clothingType.getSVGImage(
+														clothingType.getEquipSlots().get(0),
+														clothingType.getAvailablePrimaryColours().get(0),
+														clothingType.getAvailableSecondaryColours().isEmpty()?null:Util.randomItemFrom(clothingType.getAvailableSecondaryColours()),
+														clothingType.getAvailableTertiaryColours().isEmpty()?null:Util.randomItemFrom(clothingType.getAvailableTertiaryColours()),
+														null, null, null, null)
+											+"</div>"
+											+ "<div class='overlay' id='" + clothingType.getId() + "_SPAWN'></div>"
+										+ "</div>"
+										+ ClothingType.getIdFromClothingType(clothingType)
+									+ "</div>");
+				}
+				inventorySB.append("</div>");
+				
+			} else if(itemViewSlot!=null && !itemViewSlot.isWeapon()) {
+				List<AbstractClothingType> clothingToDisplay = clothingTotal.stream().filter((c) -> c.getEquipSlots().get(0)==itemViewSlot).collect(Collectors.toList());
+				inventorySB.append("<div class='inventory-not-equipped' style='-webkit-user-select:auto;'>"
+						+ "<h5>Total '"+itemViewSlot.getName()+"' slot clothing: "+clothingToDisplay.size()+"</h5>");
+				for(AbstractClothingType clothingType : clothingToDisplay) {
+					inventorySB.append("<div class='container-full-width' style='width:"+width+"%; white-space: nowrap; word-wrap: break-word; font-size:0.75em; -webkit-user-select:auto; padding:0; margin:0;'>"
+							+ "<div class='inventory-item-slot unequipped' style='width:"+imgWidth+"%; box-sizing: border-box; padding:0; margin:0; background-color:"+clothingType.getRarity().getBackgroundColour().toWebHexString()+";'>"
+								+ "<div class='inventory-icon-content'>"
+									+clothingType.getSVGImage(
+											clothingType.getEquipSlots().get(0),
+											clothingType.getAvailablePrimaryColours().get(0),
+											clothingType.getAvailableSecondaryColours().isEmpty()?null:Util.randomItemFrom(clothingType.getAvailableSecondaryColours()),
+											clothingType.getAvailableTertiaryColours().isEmpty()?null:Util.randomItemFrom(clothingType.getAvailableTertiaryColours()),
+											null, null, null, null)
+								+"</div>"
+								+ "<div class='overlay' id='" + clothingType.getId() + "_SPAWN'></div>"
+							+ "</div>"
+							+ ClothingType.getIdFromClothingType(clothingType)
+						+ "</div>");
+				}
+				inventorySB.append("</div>");
+			}
+			
+			
+			
+			return inventorySB.toString();
 		}
 
 		@Override
@@ -836,7 +991,9 @@ public class DebugDialogue {
 		return clothingCollageSB.toString();
 	}
 
-	private static String parsedText = "", rawText = "";
+	private static String parsedText = "";
+	private static String rawText = "";
+	private static String xmlFileText = "res/txt/ENTER_PATH.xml";
 	public static final DialogueNode PARSER = new DialogueNode("Parser", "", true) {
 
 		@Override
@@ -844,11 +1001,23 @@ public class DebugDialogue {
 			return ("<p>"
 					+ "<b>Please</b> at least skim over the help page before viewing the 'commands' pages! (The number of commands could be off-putting if you're not aware of how simple they really are.)"
 					+ "</p>"
+					
+
+					+ "<div class='container-full-width' style='text-align:center;'>"
+						+ "<div style='position:relative; display:inline-block; padding-bottom:0; margin 0 auto; vertical-align:middle; width:100%; text-align:center;'>"
+							+ "<p style='display:inline-block; padding:0; margin:0; width:100%;'>XML test (enter full path, including .xml): </p>"
+							+ "<br/>"
+							+ "<form style='display:inline-block; width:100%; padding:0; margin:0; text-align:center;'><input type='text' id='xmlTest' style='width:50%;' placeholder='res/txt/...' value='"+xmlFileText+"'></form>"
+						+ "</div>"
+					+ "</div>"
+					
 					+ "<p>"
-					+ "<b>This parser accepts html formatting.</b>"
+						+ "<b>This parser accepts html formatting.</b>"
 					+ "</p>"
 
-					+ "<p style='padding:0;margin:0;text-align:center;'>Parse:</p>"
+					+ "<p style='padding:0;margin:0;text-align:center;'>"
+						+ "Parse:"
+					+ "</p>"
 					+ "<form style='padding:0;margin:0;text-align:center;'>"
 					+ "<textarea id='parseInput' name='Text1' style='width:760px;height:200px;'>"+rawText+"</textarea>"
 					+ "</form>");
@@ -906,6 +1075,17 @@ public class DebugDialogue {
 					}
 				};
 				
+			} else if (index == 11) {
+				return new Response("Xml test",
+						"Parse every dialogue entry in the file whose path you've specified in order to check for errors. Lilaya, Brax, Rose, Ralph, Nyan, and Zaranix, are passed in as parser targets.",
+						PARSER){
+					@Override
+					public void effects() {
+						xmlFileText = ((String) Main.mainController.getWebEngine().executeScript("document.getElementById('xmlTest').value")).replaceAll("\u200b", "");
+						parsedText = Main.game.runXmlTest(xmlFileText);
+					}
+				};
+				
 			} else if (index == 0) {
 				return new Response("Back", "", DEBUG_MENU);
 				
@@ -938,20 +1118,23 @@ public class DebugDialogue {
 					+ "<h6>Input:</h6><br/>"
 					+"Everything is parsed using square brackets, split into the following pattern:<br/>"
 					+"[<i style='color:"+Colour.CLOTHING_BLUE_LIGHT.toWebHexString()+";'>target</i>.<i style='color:"+Colour.CLOTHING_PINK_LIGHT.toWebHexString()+";'>command</i>]<br/>"
-					+"or, for the few special commands that require arguments,<br/>"
+					+"or, for the few special commands that require arguments:<br/>"
 					+"[<i style='color:"+Colour.CLOTHING_BLUE_LIGHT.toWebHexString()+";'>target</i>.<i style='color:"+Colour.CLOTHING_PINK_LIGHT.toWebHexString()+";'>command</i>"
 							+ "<i style='color:"+Colour.CLOTHING_YELLOW.toWebHexString()+";'>(arguments)</i>]<br/>"
-					+"or, for parsing as a script,<br/>"
+					+"or, for parsing as a script:<br/>"
 					+"[#<i style='color:"+Colour.CLOTHING_PINK_LIGHT.toWebHexString()+";'>command</i>]<br/>"
+					+"or, for parsing as a script which suppresses output:<br/>"
+					+"[##<i style='color:"+Colour.CLOTHING_PINK_LIGHT.toWebHexString()+";'>command</i>]<br/>"
+					+ "<i>(This means that the command will be executed, but no String output will be displayed.)</i>"
 					+ "</p>"
 					
 					+ "<p>"
 					+"An example of use in a sentence would be:<br/><br/>"
-					+"As you start to read Innoxia's tedious parsing documentation, [lilaya.name] steps up behind you and wraps [lilaya.her] [lilaya.tail+] around your [pc.leg]."
-					+" Leaning in over your shoulder, [lilaya.she] groans, [lilaya.speech(Oh my God. This is so boring, [#pc.getName()]!)]'<br/><br/>"
+					+"<i>As you start to read Innoxia's tedious parsing documentation, [lilaya.name] steps up behind you and wraps [lilaya.her] [lilaya.tail+] around your [pc.leg]."
+					+" Leaning in over your shoulder, [lilaya.she] groans, [lilaya.speech(Oh my God. This is so boring, [#pc.getName(true)]!)]'</i><br/><br/>"
 					+ "parses to:<br/><br/>"
 					+ UtilText.parse("As you start to read Innoxia's tedious parsing documentation, [lilaya.name] steps up behind you and wraps [lilaya.her] [lilaya.tail+] around your [pc.leg]."
-							+ " Leaning in over your shoulder, [lilaya.she] groans, [lilaya.speech(Oh my God. This is so boring, [#pc.getName()]!)]")
+							+ " Leaning in over your shoulder, [lilaya.she] groans, [lilaya.speech(Oh my God. This is so boring, [#pc.getName(true)]!)]")
 					+ "</p>"
 					+ "<br/>"
 					
@@ -1337,10 +1520,10 @@ public class DebugDialogue {
 		@Override
 		public String getContent() {
 			if(Sex.isDom(Main.game.getPlayer())) {
-				GameCharacter target = Sex.getSubmissiveParticipants().entrySet().iterator().next().getKey();
+				GameCharacter target = Sex.getSubmissiveParticipants(false).entrySet().iterator().next().getKey();
 				return UtilText.parseFromXMLFile("misc/misc", "POST_SEX_2KOMA", target);
 			} else {
-				GameCharacter target = Sex.getDominantParticipants().entrySet().iterator().next().getKey();
+				GameCharacter target = Sex.getDominantParticipants(false).entrySet().iterator().next().getKey();
 				return UtilText.parseFromXMLFile("misc/misc", "POST_SEX_2KOMA_AS_SUB", target);
 			}
 		}
@@ -1419,10 +1602,10 @@ public class DebugDialogue {
 		@Override
 		public String getContent() {
 			if(Sex.isDom(Main.game.getPlayer())) {
-				GameCharacter target = Sex.getSubmissiveParticipants().entrySet().iterator().next().getKey();
+				GameCharacter target = Sex.getSubmissiveParticipants(false).entrySet().iterator().next().getKey();
 				return UtilText.parseFromXMLFile("misc/misc", "POST_SEX_CENTAUR", target);
 			} else {
-				GameCharacter target = Sex.getDominantParticipants().entrySet().iterator().next().getKey();
+				GameCharacter target = Sex.getDominantParticipants(false).entrySet().iterator().next().getKey();
 				return UtilText.parseFromXMLFile("misc/misc", "POST_SEX_CENTAUR_AS_SUB", target);
 			}
 		}

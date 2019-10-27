@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.lilithsthrone.game.PropertyValue;
-import com.lilithsthrone.game.Weather;
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.attributes.CorruptionLevel;
 import com.lilithsthrone.game.character.body.CoverableArea;
@@ -14,6 +13,7 @@ import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.npc.dominion.Amber;
 import com.lilithsthrone.game.character.npc.dominion.Zaranix;
 import com.lilithsthrone.game.character.npc.dominion.ZaranixMaidKatherine;
+import com.lilithsthrone.game.character.npc.dominion.ZaranixMaidKelly;
 import com.lilithsthrone.game.character.npc.misc.GenericSexualPartner;
 import com.lilithsthrone.game.character.persona.Name;
 import com.lilithsthrone.game.character.persona.SexualOrientation;
@@ -35,23 +35,33 @@ import com.lilithsthrone.game.sex.managers.dominion.zaranix.SMAmberDoggyFucked;
 import com.lilithsthrone.game.sex.managers.dominion.zaranix.SMPetMounting;
 import com.lilithsthrone.game.sex.managers.dominion.zaranix.SMPetOral;
 import com.lilithsthrone.game.sex.managers.universal.SMGeneric;
-import com.lilithsthrone.game.sex.positions.SexSlotBipeds;
+import com.lilithsthrone.game.sex.positions.slots.SexSlotAllFours;
+import com.lilithsthrone.game.sex.positions.slots.SexSlotUnique;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
 import com.lilithsthrone.utils.Util.Value;
 import com.lilithsthrone.world.Cell;
+import com.lilithsthrone.world.Weather;
 import com.lilithsthrone.world.WorldType;
 import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.2.2
- * @version 0.2.7
+ * @version 0.3.4
  * @author Innoxia
  */
 public class ZaranixHomeGroundFloorRepeat {
 	
 	private static NPC pet;
 	private static NPC owner;
+	
+
+	public static void resetHouseAfterLeaving() {
+		((Zaranix)Main.game.getNpc(Zaranix.class)).setStartingBody(false);
+		((Amber)Main.game.getNpc(Amber.class)).setStartingBody(false);
+		((ZaranixMaidKatherine)Main.game.getNpc(ZaranixMaidKatherine.class)).setStartingBody(false);
+		((ZaranixMaidKelly)Main.game.getNpc(ZaranixMaidKelly.class)).setStartingBody(false);
+	}
 	
 	public static final DialogueNode OUTSIDE = new DialogueNode("Zaranix's Home", "", true) {
 
@@ -76,7 +86,8 @@ public class ZaranixHomeGroundFloorRepeat {
 					return new Response("Knock door", "Knock on the door and wait for someone to answer.", OUTSIDE_KNOCK_ON_DOOR_KNOWS_AMBER) {
 						@Override
 						public void effects() {
-							Main.game.getNpc(Amber.class).setLocation(WorldType.DOMINION, PlaceType.DOMINION_DEMON_HOME_ARTHUR, false);
+							resetHouseAfterLeaving(); // Reset here as well in case the player teleported out of the house.
+							Main.game.getNpc(Amber.class).setLocation(WorldType.DOMINION, PlaceType.DOMINION_DEMON_HOME_ZARANIX, false);
 							Main.game.getNpc(Amber.class).setPlayerKnowsName(true);
 							Main.game.getNpc(Zaranix.class).returnToHome();
 						}
@@ -86,7 +97,8 @@ public class ZaranixHomeGroundFloorRepeat {
 					return new Response("Knock door", "Knock on the door and wait for someone to answer.", OUTSIDE_KNOCK_ON_DOOR) {
 						@Override
 						public void effects() {
-							Main.game.getNpc(Amber.class).setLocation(WorldType.DOMINION, PlaceType.DOMINION_DEMON_HOME_ARTHUR, false);
+							resetHouseAfterLeaving(); // Reset here as well in case the player teleported out of the house.
+							Main.game.getNpc(Amber.class).setLocation(WorldType.DOMINION, PlaceType.DOMINION_DEMON_HOME_ZARANIX, false);
 							Main.game.getNpc(Amber.class).setPlayerKnowsName(true);
 							Main.game.getNpc(Zaranix.class).returnToHome();
 						}
@@ -359,10 +371,11 @@ public class ZaranixHomeGroundFloorRepeat {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				return new Response("Exit", "Leave Zaranix's house and head back out into Demon Home.", PlaceType.DOMINION_DEMON_HOME_ARTHUR.getDialogue(false)) {
+				return new Response("Exit", "Leave Zaranix's house and head back out into Demon Home.", PlaceType.DOMINION_DEMON_HOME_ZARANIX.getDialogue(false)) {
 					@Override
 					public void effects() {
-						Main.game.getPlayer().setLocation(WorldType.DOMINION, PlaceType.DOMINION_DEMON_HOME_ARTHUR, false);
+						resetHouseAfterLeaving();
+						Main.game.getPlayer().setLocation(WorldType.DOMINION, PlaceType.DOMINION_DEMON_HOME_ZARANIX, false);
 					}
 				};
 
@@ -428,8 +441,10 @@ public class ZaranixHomeGroundFloorRepeat {
 							new SMGeneric(
 									Util.newArrayListOfValues(Main.game.getPlayer()),
 									Util.newArrayListOfValues(Main.game.getNpc(ZaranixMaidKatherine.class)),
-							null,
-							null), AFTER_KATHERINE_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX")) {
+									null,
+									null),
+							AFTER_KATHERINE_SEX,
+							UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX")) {
 						@Override
 						public void effects() {
 							Main.game.getDialogueFlags().setFlag(DialogueFlagValue.katherineRepeatEncountered, true);
@@ -444,8 +459,10 @@ public class ZaranixHomeGroundFloorRepeat {
 							new SMGeneric(
 									Util.newArrayListOfValues(Main.game.getNpc(ZaranixMaidKatherine.class)),
 									Util.newArrayListOfValues(Main.game.getPlayer()),
-							null,
-							null), AFTER_KATHERINE_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX_SUB")) {
+									null,
+									null),
+							AFTER_KATHERINE_SEX,
+							UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX_SUB")) {
 						@Override
 						public void effects() {
 							Main.game.getDialogueFlags().setFlag(DialogueFlagValue.katherineRepeatEncountered, true);
@@ -504,7 +521,7 @@ public class ZaranixHomeGroundFloorRepeat {
 
 		@Override
 		public Response getResponse(int responseTab, int index) {
-			if(Main.game.getPlayer().getLocationPlace().getPlaceType()==PlaceType.ZARANIX_GF_STAIRS) {
+			if(Main.game.getPlayer().getLocationPlace().getPlaceType().equals(PlaceType.ZARANIX_GF_STAIRS)) {
 				if(index==1) {
 					return new Response("Upstairs", "Head upstairs to the first floor of Zaranix's house.", PlaceType.ZARANIX_FF_STAIRS.getDialogue(false)) {
 						@Override
@@ -532,7 +549,7 @@ public class ZaranixHomeGroundFloorRepeat {
 
 		@Override
 		public Response getResponse(int responseTab, int index) {
-			if(Main.game.getPlayer().getLocationPlace().getPlaceType()==PlaceType.ZARANIX_GF_STAIRS) {
+			if(Main.game.getPlayer().getLocationPlace().getPlaceType().equals(PlaceType.ZARANIX_GF_STAIRS)) {
 				if(index==1) {
 					return new Response("Upstairs", "Head upstairs to the first floor of Zaranix's house.", PlaceType.ZARANIX_FF_STAIRS.getDialogue(false)) {
 						@Override
@@ -589,8 +606,10 @@ public class ZaranixHomeGroundFloorRepeat {
 							new SMGeneric(
 									Util.newArrayListOfValues(Main.game.getPlayer()),
 									Util.newArrayListOfValues(Main.game.getNpc(ZaranixMaidKatherine.class)),
-							null,
-							null), AFTER_KATHERINE_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX")) {
+									null,
+									null),
+							AFTER_KATHERINE_SEX,
+							UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX")) {
 						@Override
 						public void effects() {
 							Main.game.getDialogueFlags().setFlag(DialogueFlagValue.katherineRepeatEncountered, true);
@@ -605,8 +624,10 @@ public class ZaranixHomeGroundFloorRepeat {
 							new SMGeneric(
 									Util.newArrayListOfValues(Main.game.getNpc(ZaranixMaidKatherine.class)),
 									Util.newArrayListOfValues(Main.game.getPlayer()),
-							null,
-							null), AFTER_KATHERINE_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX_SUB")) {
+									null,
+									null),
+							AFTER_KATHERINE_SEX,
+							UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "KATHERINE_SEX_SUB")) {
 						@Override
 						public void effects() {
 							Main.game.getDialogueFlags().setFlag(DialogueFlagValue.katherineRepeatEncountered, true);
@@ -827,10 +848,12 @@ public class ZaranixHomeGroundFloorRepeat {
 								Util.newArrayListOfValues(Fetish.FETISH_SUBMISSIVE, Fetish.FETISH_MASOCHIST), null, CorruptionLevel.THREE_DIRTY, null, null, null,
 								true, false,
 								new SMAmberDoggyFucked(
-										Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotBipeds.DOGGY_BEHIND)),
-										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.DOGGY_ON_ALL_FOURS))),
+										Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotAllFours.BEHIND)),
+										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotAllFours.ALL_FOURS))),
 								null,
-								null, AMBER_LOUNGE_POST_CONSENSUAL_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "LOUNGE_AMBER_BEG_FOR_SEX"));
+								null,
+								AMBER_LOUNGE_POST_CONSENSUAL_SEX,
+								UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "LOUNGE_AMBER_BEG_FOR_SEX"));
 					}
 					
 				} else if(index==4) {
@@ -891,10 +914,12 @@ public class ZaranixHomeGroundFloorRepeat {
 								Util.newArrayListOfValues(Fetish.FETISH_SUBMISSIVE, Fetish.FETISH_MASOCHIST), null, CorruptionLevel.THREE_DIRTY, null, null, null,
 								true, false,
 								new SMAmberDoggyFucked(
-										Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotBipeds.DOGGY_BEHIND)),
-										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.DOGGY_ON_ALL_FOURS))),
+										Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotAllFours.BEHIND)),
+										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotAllFours.ALL_FOURS))),
 								null,
-								null, AMBER_LOUNGE_POST_CONSENSUAL_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "LOUNGE_AMBER_BEG_FOR_SEX"));
+								null,
+								AMBER_LOUNGE_POST_CONSENSUAL_SEX,
+								UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "LOUNGE_AMBER_BEG_FOR_SEX"));
 					}
 					
 				}  else if(index==4) {
@@ -1154,10 +1179,12 @@ public class ZaranixHomeGroundFloorRepeat {
 						Util.newArrayListOfValues(Fetish.FETISH_SUBMISSIVE), null, CorruptionLevel.THREE_DIRTY, null, null, null,
 						!Main.getProperties().hasValue(PropertyValue.nonConContent), false,
 						new SMAmberDoggyFucked(
-								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotBipeds.DOGGY_BEHIND)),
-								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.DOGGY_ON_ALL_FOURS))),
+								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotAllFours.BEHIND)),
+								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotAllFours.ALL_FOURS))),
 						null,
-						null, AMBER_LOUNGE_POST_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "LOUNGE_AMBER_FURIOUS_APOLOGY")) {
+						null,
+						AMBER_LOUNGE_POST_SEX,
+						UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "LOUNGE_AMBER_FURIOUS_APOLOGY")) {
 					@Override
 					public void effects() {
 						Main.game.getTextEndStringBuilder().append(Main.game.getNpc(Amber.class).incrementAffection(Main.game.getPlayer(), 15));
@@ -1250,10 +1277,12 @@ public class ZaranixHomeGroundFloorRepeat {
 				return new ResponseSex("Used", "Amber starts fucking you.",
 						false, false,
 						new SMAmberDoggyFucked(
-								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotBipeds.DOGGY_BEHIND)),
-								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.DOGGY_ON_ALL_FOURS))),
+								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotAllFours.BEHIND)),
+								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotAllFours.ALL_FOURS))),
 						null,
-						null, AFTER_AMBER_SEX_LOSS, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "COMBAT_LOSS_SEX"));
+						null,
+						AFTER_AMBER_SEX_LOSS,
+						UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "COMBAT_LOSS_SEX"));
 			} else {
 				return null;
 			}
@@ -1306,8 +1335,10 @@ public class ZaranixHomeGroundFloorRepeat {
 						new SMGeneric(
 								Util.newArrayListOfValues(Main.game.getPlayer()),
 								Util.newArrayListOfValues(Main.game.getNpc(Amber.class)),
-						null,
-						null), AFTER_AMBER_SEX_VICTORY, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "COMBAT_VICTORY_SEX"));
+								null,
+								null),
+						AFTER_AMBER_SEX_VICTORY,
+						UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "COMBAT_VICTORY_SEX"));
 				
 			} else if(index==3) {
 				return new ResponseSex("Submit",
@@ -1315,10 +1346,12 @@ public class ZaranixHomeGroundFloorRepeat {
 						Util.newArrayListOfValues(Fetish.FETISH_SUBMISSIVE), null, CorruptionLevel.THREE_DIRTY, null, null, null,
 						false, false,
 						new SMAmberDoggyFucked(
-								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotBipeds.DOGGY_BEHIND)),
-								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.DOGGY_ON_ALL_FOURS))),
+								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotAllFours.BEHIND)),
+								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotAllFours.ALL_FOURS))),
 						null,
-						null, AFTER_AMBER_SEX_SUB_VICTORY, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "COMBAT_VICTORY_SEX_SEB"));
+						null,
+						AFTER_AMBER_SEX_SUB_VICTORY,
+						UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "COMBAT_VICTORY_SEX_SEB"));
 				
 			} else {
 				return null;
@@ -1497,7 +1530,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 					}
 				};
 				
@@ -1526,7 +1559,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 					}
 				};
 				
@@ -1555,7 +1588,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 					}
 				};
 				
@@ -1584,7 +1617,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 					}
 				};
 				
@@ -1613,7 +1646,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 					}
 				};
 				
@@ -1651,8 +1684,8 @@ public class ZaranixHomeGroundFloorRepeat {
 						null, null, null, null, null, null,
 						true, false,
 						new SMAmberDoggyFucked(
-								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotBipeds.DOGGY_BEHIND)),
-								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.DOGGY_ON_ALL_FOURS))),
+								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Amber.class), SexSlotAllFours.BEHIND)),
+								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotAllFours.ALL_FOURS))),
 						null,
 						null,
 						WALKIES_AMBER_FUCKS_POST_SEX,
@@ -1688,7 +1721,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 					}
 				};
 				
@@ -1712,7 +1745,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 					}
 				};
 				
@@ -1769,7 +1802,7 @@ public class ZaranixHomeGroundFloorRepeat {
 								break;
 							}
 							owner.addSlave(pet);
-							pet.unequipAllClothingIntoVoid(true);
+							pet.unequipAllClothingIntoVoid(true, true);
 							pet.clearFetishDesires();
 							pet.clearFetishes();
 							if(Main.game.getPlayer().hasVagina() && Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
@@ -1836,7 +1869,7 @@ public class ZaranixHomeGroundFloorRepeat {
 						@Override
 						public void effects() {
 							Main.game.getNpc(Amber.class).returnToHome();
-							Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+							Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 							Main.game.banishNPC(owner);
 							Main.game.banishNPC(pet);
 						}
@@ -1863,15 +1896,17 @@ public class ZaranixHomeGroundFloorRepeat {
 								null, null, null, null, null, null,
 								true, false,
 								new SMPetMounting(
-										Util.newHashMapOfValues(new Value<>(pet, SexSlotBipeds.PET_MOUNTING_HUMPING)),
-										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.PET_MOUNTING_ON_ALL_FOURS))) {
+										Util.newHashMapOfValues(new Value<>(pet, SexSlotUnique.PET_MOUNTING_HUMPING)),
+										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotUnique.PET_MOUNTING_ON_ALL_FOURS))) {
 									@Override
 									public Map<GameCharacter, List<CoverableArea>> exposeAtStartOfSexMap() {
 										return Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), Util.newArrayListOfValues(CoverableArea.ANUS, CoverableArea.VAGINA)));
 									}
 								},
 								null,
-								null, WALKIES_PET_FUCKS_POST_SEX, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "WALKIES_PET_FUCKS_START", Util.newArrayListOfValues(owner, pet))
+								null,
+								WALKIES_PET_FUCKS_POST_SEX,
+								UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "WALKIES_PET_FUCKS_START", Util.newArrayListOfValues(owner, pet))
 								+ (Main.game.getPlayer().isCoverableAreaVisible(CoverableArea.ANUS) || (Main.game.getPlayer().hasVagina() && Main.game.getPlayer().isCoverableAreaVisible(CoverableArea.VAGINA))
 										?UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "WALKIES_PET_FUCKS_START_EXPOSED", Util.newArrayListOfValues(owner, pet))
 										:UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "WALKIES_PET_FUCKS_START_CLOTHING", Util.newArrayListOfValues(owner, pet)))
@@ -1889,8 +1924,8 @@ public class ZaranixHomeGroundFloorRepeat {
 								null, null, null, null, null, null,
 								true, false,
 								new SMPetOral(
-										Util.newHashMapOfValues(new Value<>(pet, SexSlotBipeds.PET_ORAL_COCKED_LEG)),
-										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.PET_ORAL_ON_ALL_FOURS))),
+										Util.newHashMapOfValues(new Value<>(pet, SexSlotUnique.PET_ORAL_COCKED_LEG)),
+										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotUnique.PET_ORAL_ON_ALL_FOURS))),
 								null,
 								null, WALKIES_PET_FUCKS_POST_SEX_ORAL, UtilText.parseFromXMLFile("places/dominion/zaranixHome/groundFloorRepeat", "WALKIES_PET_FUCKS_START_ORAL", Util.newArrayListOfValues(owner, pet))) {
 							@Override
@@ -1921,9 +1956,9 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 						Main.game.banishNPC(owner);
-						owner.removeSlave(pet); //To stop issues with banisNPC() TODO fix this
+						owner.removeSlave(pet); //To stop issues with banishNPC() TODO fix this
 						Main.game.banishNPC(pet);
 					}
 				};
@@ -1948,7 +1983,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 						Main.game.banishNPC(owner);
 						owner.removeSlave(pet); //To stop issues with banishNPC() TODO fix this
 						Main.game.banishNPC(pet);
@@ -1980,7 +2015,7 @@ public class ZaranixHomeGroundFloorRepeat {
 					@Override
 					public void effects() {
 						Main.game.getNpc(Amber.class).returnToHome();
-						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_ENTRANCE, false);
+						Main.game.getPlayer().setLocation(WorldType.ZARANIX_HOUSE_GROUND_FLOOR, PlaceType.ZARANIX_GF_LOUNGE, false);
 						Main.game.banishNPC(owner);
 						Main.game.banishNPC(pet);
 					}
@@ -2015,7 +2050,7 @@ public class ZaranixHomeGroundFloorRepeat {
 
 		@Override
 		public Response getResponse(int responseTab, int index) {
-			return ENTRANCE.getResponse(responseTab, index);
+			return LOUNGE.getResponse(responseTab, index);
 		}
 	};
 	

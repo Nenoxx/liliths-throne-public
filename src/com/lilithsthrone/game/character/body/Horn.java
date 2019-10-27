@@ -81,6 +81,11 @@ public class Horn implements BodyPartInterface {
 		
 		UtilText.transformationContentSB.setLength(0);
 		
+		if (type == HornType.HORSE_STRAIGHT) {
+			this.setHornsPerRow(owner, 1);
+			this.setHornRows(owner, 1);
+		}
+
 		if(this.type.equals(HornType.NONE)) {
 			UtilText.transformationContentSB.append(UtilText.parse(owner, 
 					"<p>"
@@ -129,6 +134,8 @@ public class Horn implements BodyPartInterface {
 		boolean removingHorns = owner.getHornRows() > rows;
 		this.rows = rows;
 		
+		owner.postTransformationCalculation();
+		
 		if (owner.getHornType().equals(HornType.NONE)) {
 			return "<p style='text-align:center;'>[style.colourDisabled(Nothing happens...)]</p>";
 		}
@@ -168,6 +175,8 @@ public class Horn implements BodyPartInterface {
 		
 		boolean removingHorns = owner.getHornsPerRow() > hornsPerRow;
 		this.hornsPerRow = hornsPerRow;
+		
+		owner.postTransformationCalculation();
 		
 		if (owner.getHornType().equals(HornType.NONE)) {
 			return "<p style='text-align:center;'>[style.colourDisabled(Nothing happens...)]</p>";

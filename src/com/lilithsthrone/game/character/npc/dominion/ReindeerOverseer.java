@@ -1,15 +1,17 @@
 package com.lilithsthrone.game.character.npc.dominion;
 
 import java.time.Month;
+import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.lilithsthrone.game.Season;
-import com.lilithsthrone.game.Weather;
+import com.lilithsthrone.game.Game;
 import com.lilithsthrone.game.character.CharacterImportSetting;
 import com.lilithsthrone.game.character.CharacterUtils;
-import com.lilithsthrone.game.character.attributes.Attribute;
+import com.lilithsthrone.game.character.EquipClothingSetting;
+import com.lilithsthrone.game.character.effects.PerkCategory;
+import com.lilithsthrone.game.character.effects.PerkManager;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.persona.Name;
@@ -31,6 +33,9 @@ import com.lilithsthrone.game.inventory.item.AbstractItemType;
 import com.lilithsthrone.game.inventory.item.ItemType;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
+import com.lilithsthrone.utils.Util.Value;
+import com.lilithsthrone.world.Season;
+import com.lilithsthrone.world.Weather;
 import com.lilithsthrone.world.WorldType;
 import com.lilithsthrone.world.places.PlaceType;
 
@@ -98,19 +103,32 @@ public class ReindeerOverseer extends NPC {
 			resetInventory(true);
 			inventory.setMoney(10 + Util.random.nextInt(getLevel()*10) + 1);
 
-			equipClothing(true, true, true, true);
+			equipClothing(EquipClothingSetting.getAllClothingSettings());
 			CharacterUtils.applyMakeup(this, true);
 			
-			dailyReset(); // Give items for sale.
-			
-			setMana(getAttributeValue(Attribute.MANA_MAXIMUM));
-			setHealth(getAttributeValue(Attribute.HEALTH_MAXIMUM));
+			dailyUpdate(); // Give items for sale.
+
+			initHealthAndManaToMax();
 		}
 	}
 	
 	@Override
 	public void loadFromXML(Element parentElement, Document doc, CharacterImportSetting... settings) {
 		loadNPCVariablesFromXML(this, null, parentElement, doc, settings);
+
+		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.3.6")) {
+			this.resetPerksMap(true);
+		}
+	}
+
+	@Override
+	public void setupPerks(boolean autoSelectPerks) {
+		PerkManager.initialisePerks(this,
+				Util.newArrayListOfValues(),
+				Util.newHashMapOfValues(
+						new Value<>(PerkCategory.PHYSICAL, 3),
+						new Value<>(PerkCategory.LUST, 1),
+						new Value<>(PerkCategory.ARCANE, 0)));
 	}
 
 	@Override
@@ -119,9 +137,9 @@ public class ReindeerOverseer extends NPC {
 	}
 
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
-		CharacterUtils.equipClothingFromOutfitType(this, OutfitType.MANUAL_LABOUR, replaceUnsuitableClothing, addWeapons, addScarsAndTattoos, addAccessories);
-//		super.equipClothing(replaceUnsuitableClothing, addWeapons, addScarsAndTattoos, addAccessories);
+	public void equipClothing(List<EquipClothingSetting> settings) {
+		CharacterUtils.equipClothingFromOutfitType(this, OutfitType.JOB_LABOUR, settings);
+//		super.equipClothing(settings);
 	}
 	
 	@Override
@@ -136,7 +154,7 @@ public class ReindeerOverseer extends NPC {
 	}
 	
 	@Override
-	public void dailyReset() {
+	public void dailyUpdate() {
 		
 		if(!this.isSlave()) {
 			if(Main.game.getCurrentWeather()!=Weather.SNOW && Main.game.getSeason()!=Season.WINTER) {
@@ -146,9 +164,9 @@ public class ReindeerOverseer extends NPC {
 				}
 			}
 			
-			clearNonEquippedInventory();
+			clearNonEquippedInventory(false);
 			
-			if(this.getLocationPlace().getPlaceType()==PlaceType.DOMINION_STREET && !this.getLocation().equals(Main.game.getPlayer().getLocation())) {
+			if(this.getLocationPlace().getPlaceType().equals(PlaceType.DOMINION_STREET) && !this.getLocation().equals(Main.game.getPlayer().getLocation())) {
 				this.moveToAdjacentMatchingCellType(true);
 				Main.game.getDialogueFlags().dailyReindeerReset(this.getId());
 			}
@@ -166,7 +184,7 @@ public class ReindeerOverseer extends NPC {
 			}
 			
 			for (AbstractClothingType clothing : ClothingType.getAllClothing()) {
-				if(clothing!=null && clothing.getItemTags().contains(ItemTag.REINDEER_GIFT)) {
+				if(clothing!=null && clothing.getDefaultItemTags().contains(ItemTag.REINDEER_GIFT)) {
 					for (int i = 0; i < 1 + (Util.random.nextInt(2)); i++) {
 						this.addClothing(AbstractClothingType.generateClothing(clothing), false);
 					}

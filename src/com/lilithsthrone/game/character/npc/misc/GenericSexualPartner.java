@@ -11,11 +11,10 @@ import java.util.function.Predicate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.lilithsthrone.game.Season;
 import com.lilithsthrone.game.character.CharacterImportSetting;
 import com.lilithsthrone.game.character.CharacterUtils;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.GameCharacter;
-import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.effects.StatusEffect;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.gender.Gender;
@@ -30,24 +29,26 @@ import com.lilithsthrone.game.dialogue.DialogueFlagValue;
 import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.CharacterInventory;
+import com.lilithsthrone.game.inventory.clothing.OutfitType;
 import com.lilithsthrone.game.sex.Sex;
 import com.lilithsthrone.game.sex.SexAreaOrifice;
 import com.lilithsthrone.game.sex.SexAreaPenetration;
 import com.lilithsthrone.game.sex.SexParticipantType;
 import com.lilithsthrone.game.sex.SexType;
 import com.lilithsthrone.game.sex.positions.AbstractSexPosition;
-import com.lilithsthrone.game.sex.positions.SexSlot;
-import com.lilithsthrone.game.sex.positions.SexSlotBipeds;
+import com.lilithsthrone.game.sex.positions.slots.SexSlot;
+import com.lilithsthrone.game.sex.positions.slots.SexSlotUnique;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Colour;
 import com.lilithsthrone.utils.Util;
 import com.lilithsthrone.utils.Vector2i;
+import com.lilithsthrone.world.Season;
 import com.lilithsthrone.world.WorldType;
 import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.2.2
- * @version 0.2.6
+ * @version 0.3.4
  * @author Innoxia
  */
 public class GenericSexualPartner extends NPC {
@@ -131,14 +132,13 @@ public class GenericSexualPartner extends NPC {
 			resetInventory(true);
 			inventory.setMoney(10 + Util.random.nextInt(getLevel()*10) + 1);
 
-			this.equipClothing(true, true, true, true);
+			this.equipClothing(EquipClothingSetting.getAllClothingSettings());
 			CharacterUtils.applyMakeup(this, true);
 			
 			// Set starting attributes based on the character's race
-			initAttributes();
-			
-			setMana(getAttributeValue(Attribute.MANA_MAXIMUM));
-			setHealth(getAttributeValue(Attribute.HEALTH_MAXIMUM));
+			initPerkTreeAndBackgroundPerks();
+
+			initHealthAndManaToMax();
 		}
 	}
 	
@@ -155,8 +155,8 @@ public class GenericSexualPartner extends NPC {
 	}
 
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
-		super.equipClothing(replaceUnsuitableClothing, addWeapons, addScarsAndTattoos, addAccessories); //TODO - add unique outfit type
+	public void equipClothing(List<EquipClothingSetting> settings) {
+		CharacterUtils.equipClothingFromOutfitType(this, OutfitType.CASUAL, settings);
 	}
 	
 	@Override
@@ -182,7 +182,7 @@ public class GenericSexualPartner extends NPC {
 	
 	@Override
 	public void generateSexChoices(boolean resetPositioningBan, GameCharacter target, List<SexType> request) {
-		if(this.getLocationPlace().getPlaceType()==PlaceType.WATERING_HOLE_TOILETS && Sex.getTurn()>1) {
+		if(this.getLocationPlace().getPlaceType().equals(PlaceType.WATERING_HOLE_TOILETS) && Sex.getTurn()>1) {
 			playerRequested = true;
 		}
 		
@@ -191,21 +191,21 @@ public class GenericSexualPartner extends NPC {
 	
 	@Override
 	public boolean isHappyToBeInSlot(AbstractSexPosition position, SexSlot slot, GameCharacter target) {
-		if(this.getLocationPlace().getPlaceType()!=PlaceType.WATERING_HOLE_TOILETS || playerRequested) {
+		if(!this.getLocationPlace().getPlaceType().equals(PlaceType.WATERING_HOLE_TOILETS) || playerRequested) {
 			return super.isHappyToBeInSlot(position, slot, target);
 			
 		} else {
-			if(Sex.isInForeplay() || this.hasFetish(Fetish.FETISH_ORAL_GIVING) || !target.hasPenis()) {
-				return slot==SexSlotBipeds.GLORY_HOLE_KNEELING;
+			if(Sex.isInForeplay(this) || this.hasFetish(Fetish.FETISH_ORAL_GIVING) || !target.hasPenis()) {
+				return slot==SexSlotUnique.GLORY_HOLE_KNEELING;
 			} else {
-				return slot==SexSlotBipeds.GLORY_HOLE_FUCKED;
+				return slot==SexSlotUnique.GLORY_HOLE_FUCKED;
 			}
 		}
 	}
 
 	@Override
 	public SexType getForeplayPreference(GameCharacter target) {
-		if(this.getLocationPlace().getPlaceType()!=PlaceType.WATERING_HOLE_TOILETS || playerRequested) {
+		if(!this.getLocationPlace().getPlaceType().equals(PlaceType.WATERING_HOLE_TOILETS) || playerRequested) {
 			return super.getForeplayPreference(target);
 		}
 		
@@ -220,7 +220,7 @@ public class GenericSexualPartner extends NPC {
 
 	@Override
 	public SexType getMainSexPreference(GameCharacter target) {
-		if(this.getLocationPlace().getPlaceType()!=PlaceType.WATERING_HOLE_TOILETS || playerRequested) {
+		if(!this.getLocationPlace().getPlaceType().equals(PlaceType.WATERING_HOLE_TOILETS) || playerRequested) {
 			return super.getMainSexPreference(target);
 		}
 		
@@ -240,8 +240,8 @@ public class GenericSexualPartner extends NPC {
 	@Override
 	public String getVirginityLossOrificeDescription(GameCharacter characterPenetrating, SexAreaPenetration penetrationType, GameCharacter characterPenetrated, SexAreaOrifice orifice){
 		if(!characterPenetrated.isPlayer()
-				|| (characterPenetrating.getLocationPlace().getPlaceType()!=PlaceType.GAMBLING_DEN_FUTA_PREGNANCY
-					&& characterPenetrating.getLocationPlace().getPlaceType()!=PlaceType.GAMBLING_DEN_PREGNANCY)) {
+				|| (!characterPenetrating.getLocationPlace().getPlaceType().equals(PlaceType.GAMBLING_DEN_FUTA_PREGNANCY)
+					&& !characterPenetrating.getLocationPlace().getPlaceType().equals(PlaceType.GAMBLING_DEN_PREGNANCY))) {
 			return super.getVirginityLossOrificeDescription(characterPenetrating, penetrationType, characterPenetrated, orifice);
 		}
 		
