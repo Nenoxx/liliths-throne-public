@@ -15,6 +15,7 @@ import com.lilithsthrone.game.character.effects.AbstractPerk;
 import com.lilithsthrone.game.character.effects.StatusEffect;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.race.Race;
+import com.lilithsthrone.game.combat.CombatMove;
 import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.sex.Sex;
@@ -28,7 +29,7 @@ import com.lilithsthrone.utils.Util;
 
 /**
  * @since 0.1.69
- * @version 0.3.4
+ * @version 0.3.4.5
  * @author Innoxia
  */
 public class Response {
@@ -45,7 +46,9 @@ public class Response {
 	private Femininity femininityRequired;
 	private Race raceRequired;
 
-	// Sexa ction variables:
+	private CombatMove combatMove;
+	
+	// Sex action variables:
 	
 	private SexActionType sexActionType;
 	
@@ -102,6 +105,8 @@ public class Response {
 		this.perksRequired = perksRequired;
 		this.femininityRequired = femininityRequired;
 		this.raceRequired = raceRequired;
+		
+		combatMove = null;
 		
 		// Sex action variables:
 		
@@ -174,6 +179,10 @@ public class Response {
 		return false;
 	}
 	
+	public CombatMove getAssociatedCombatMove() {
+		return combatMove;
+	}
+	
 	public Colour getHighlightColour() {
 		if(isSexHighlight()) {
 			return Colour.GENERIC_SEX;
@@ -205,63 +214,91 @@ public class Response {
 	public SexActionType getSexActionType() {
 		return null;
 	}
-	
+
+	/**
+	 * @return true if this response is generated from a SexAction which applies a START_ONGOING action while the related body parts are already in use (thus switching them).
+	 */
+	public boolean isSexActionSwitch() {
+		return false;
+	}
+	/**
+	 * @return Typically null, unless this method is overridden in order to set special requirements related to the availability of a sex action of type START_ADDITIONAL_ONGOING.
+	 *  The keys correspond descriptions of requirements, while the value is used to determine if this requirement is met.
+	 */
 	public Map<String, Boolean> getAdditionalOngoingAvailableMap() {
 		return null;
 	}
 	
+	/**
+	 * @return true if all values in the getAdditionalOngoingAvailableMap() are true.
+	 */
 	private boolean isAvailableFromAdditionalOngoingAvailableMap() {
-		if(getAdditionalOngoingAvailableMap()==null) {
-			return false;
-		}
-		for(Boolean b : getAdditionalOngoingAvailableMap().values()) {
-			if(!b) {
-				return false;
-			}
-		}
-		return true;
+		return getAdditionalOngoingAvailableMap()!=null && !getAdditionalOngoingAvailableMap().values().contains(false);
 	}
-	
+
 	public final void applyEffects() {
 		effects();
 	}
-	
+
 	public void effects() {
 	}
 	
+	/**
+	 * @return true if this response has any related requirements in order for it to be selected.
+	 */
 	public boolean hasRequirements() {
 		return fetishesRequired != null
 				|| corruptionBypass != null
 				|| perksRequired != null
 				|| femininityRequired != null
 				|| raceRequired != null
+				|| sexActionType==SexActionType.SPEECH
 				|| getAdditionalOngoingAvailableMap()!=null
 				|| !sexAreaAccessRequiredForPerformer.isEmpty()
 				|| !sexAreaAccessRequiredForTargeted.isEmpty();
 	}
 	
+	/**
+	 * @return true if this action has no requirements, or if all requirements are met.
+	 */
 	public boolean isAvailable(){
-		if(hasRequirements()) {
-			return (isCorruptionWithinRange() || isAvailableFromFetishes() || (corruptionBypass==null && fetishesRequired==null) || Main.getProperties().hasValue(PropertyValue.bypassSexActions))
+		if(!hasRequirements()) {
+			return true;
+		}
+		boolean corruptionOrFetishReqs = false;
+		if(sexActionType!=null) {
+			corruptionOrFetishReqs = isCorruptionWithinRange() || isAvailableFromFetishes() || (corruptionBypass==null && fetishesRequired==null);
+		} else {
+			if(corruptionBypass==null) {
+				corruptionOrFetishReqs = isAvailableFromFetishes() || fetishesRequired==null;
+			} else {
+				corruptionOrFetishReqs = isCorruptionWithinRange() || isAvailableFromFetishes();
+			}
+		}
+		
+		return corruptionOrFetishReqs
 					&& !isBlockedFromPerks()
 					&& isFemininityInRange()
 					&& isRequiredRace()
+					&& (sexActionType!=SexActionType.SPEECH || !Sex.isOngoingActionsBlockingSpeech(Main.game.getPlayer()))
 					&& (isAvailableFromAdditionalOngoingAvailableMap() || (isPenetrationTypeAvailable() && isOrificeTypeAvailable()));
-		} else {
-			return true;
-		}
 	}
 	
+	/**
+	 * @return true if this action is not available from the requirements, and is instead available due to being able to bypass the corruption requirements.
+	 */
 	public boolean isAbleToBypass(){
-		if(!isAvailable()) {
-			// What even is this mess?
-			return !(isBlockedFromPerks()
-						|| !isFemininityInRange()
-						|| !isRequiredRace()
-						|| !isPenetrationTypeAvailable()
-						|| !isOrificeTypeAvailable()
-						|| !isAvailableFromAdditionalOngoingAvailableMap()
-						|| (corruptionBypass==null && fetishesRequired!=null));
+		if(!isAvailable()
+				&& (!Main.game.isInSex() || Main.getProperties().hasValue(PropertyValue.bypassSexActions))
+				&& !isBlockedFromPerks()
+				&& isFemininityInRange()
+				&& isRequiredRace()
+				&& !isAvailableFromFetishes()
+				&& (isAvailableFromAdditionalOngoingAvailableMap() || (isPenetrationTypeAvailable() && isOrificeTypeAvailable()))) {
+			if(!Main.game.isInSex() && corruptionBypass==null) { // DO not allow bypass out of sex if there is no corruption bypassing
+				return false;
+			}
+			return !isCorruptionWithinRange();
 		}
 		
 		return false;
@@ -293,10 +330,40 @@ public class Response {
 		return SB.toString();
 	}
 	
+	public String getAdditionalSexActionInformationText() {
+		if(this.getSexActionType()==SexActionType.START_ADDITIONAL_ONGOING) {
+			return "This action will cause you to [style.colourSex(join in)] with the related ongoing action.";
+			
+		} else if(isSwitchOngoingActionAvailable()) {
+			return "This action will cause [style.colourCorruption(some ongoing actions to be stopped)] before starting the related ongoing action.";
+		}
+		return "";
+	}
+	
 	private boolean isSwitchOngoingActionAvailable() {
-		if(this.sexActionType ==SexActionType.START_ONGOING && Sex.getCharacterPerformingAction().isPlayer() && Sex.getSexControl(characterPerformingSexAction).getValue()>=SexControl.ONGOING_PLUS_LIMITED_PENETRATIONS.getValue()) {
+		if(this.sexActionType ==SexActionType.START_ONGOING
+				&& Sex.getCharacterPerformingAction().isPlayer()
+				&& Sex.getSexControl(characterPerformingSexAction).getValue()>=SexControl.ONGOING_PLUS_LIMITED_PENETRATIONS.getValue()) {
+//			if(Sex.getCharactersHavingOngoingActionWith(characterTargetedForSexAction, this.sexAreaAccessRequiredForTargeted.get(0)).size()>1
+//					|| (!Sex.getCharactersHavingOngoingActionWith(characterTargetedForSexAction, this.sexAreaAccessRequiredForTargeted.get(0)).contains(characterTargetedForSexAction)
+//							&& !Sex.getCharactersHavingOngoingActionWith(characterTargetedForSexAction, this.sexAreaAccessRequiredForTargeted.get(0)).contains(Main.game.getPlayer()))) {
+//				return false;
+//			}
+			List<GameCharacter> ongoingTargetedAreaCharacters = Sex.getCharactersHavingOngoingActionWith(characterTargetedForSexAction, this.sexAreaAccessRequiredForTargeted.get(0));
+			List<GameCharacter> ongoingPerformingAreaCharacters = Sex.getCharactersHavingOngoingActionWith(characterPerformingSexAction, this.sexAreaAccessRequiredForPerformer.get(0));
+			
+			// If targeted area is having multiple ongoing actions, or non-self actions that do not involve the player do not allow switch:
+			if(ongoingTargetedAreaCharacters.size()>1 || ongoingPerformingAreaCharacters.size()>1) {
+				return false;
+			}
+			if(!ongoingTargetedAreaCharacters.isEmpty()
+					&& !ongoingTargetedAreaCharacters.contains(characterTargetedForSexAction)
+					&& !ongoingTargetedAreaCharacters.contains(Main.game.getPlayer())) {
+				return false;
+			}
+			
 			try {
-				return !Sex.getOngoingActionsMap(Sex.getCharacterPerformingAction()).get(this.sexAreaAccessRequiredForPerformer.get(0)).get(characterTargetedForSexAction).contains(this.sexAreaAccessRequiredForTargeted.get(0));
+				return !Sex.getOngoingActionsMap(characterPerformingSexAction).get(this.sexAreaAccessRequiredForPerformer.get(0)).get(characterTargetedForSexAction).contains(this.sexAreaAccessRequiredForTargeted.get(0));
 			} catch(Exception ex) {
 				return true;
 			}
@@ -349,6 +416,18 @@ public class Response {
 						+"<b style='color:"+Colour.GENERIC_BAD.toWebHexString()+";'>Requirement</b>"
 						+ " (Race): "
 						+"<span style='color:"+raceRequired.getColour().toWebHexString()+";'>"+Util.capitaliseSentence(raceRequired.getName(false))+"</span>");
+			}
+		}
+		
+		if(sexActionType==SexActionType.SPEECH) {
+			if(!Sex.isOngoingActionsBlockingSpeech(Main.game.getPlayer())) {
+				SB.append("<br/>"
+						+"<b style='color:"+Colour.GENERIC_GOOD.toWebHexString()+";'>Requirement</b>"
+						+ " (Speech): [style.colourMinorGood(Unblocked mouth)]");
+			} else {
+				SB.append("<br/>"
+						+"<b style='color:"+Colour.GENERIC_BAD.toWebHexString()+";'>Requirement</b>"
+						+ " (Speech): [style.colourMinorBad(Unblocked mouth)]");
 			}
 		}
 		
@@ -515,6 +594,9 @@ public class Response {
 		if(raceRequired!=null) {
 			lineHeight++;
 		}
+		if(sexActionType==SexActionType.SPEECH) {
+			lineHeight++;
+		}
 		
 		if(fetishesRequired!=null) {
 			lineHeight+=fetishesRequired.size();
@@ -541,25 +623,28 @@ public class Response {
 	}
 	
 	public boolean isAvailableFromFetishes() {
-		if(fetishesRequired==null)
+		if(fetishesRequired==null) {
 			return false;
+		}
 		
 		for (Fetish f : fetishesRequired) {
 			if(Main.game.getPlayer().hasFetish(f)) {
 				if(f==Fetish.FETISH_PURE_VIRGIN) {
-					if(Main.game.getPlayer().hasStatusEffect(StatusEffect.FETISH_PURE_VIRGIN)) // Virginity fetish only blocks if player is still a virgin.
+					if(Main.game.getPlayer().hasStatusEffect(StatusEffect.FETISH_PURE_VIRGIN)) { // Virginity fetish only blocks if player is still a virgin.
 						return true;
-				} else
+					}
+				} else {
 					return true;
+				}
 			}
 		}
 		return false;
 	}
 	
 	public boolean isBlockedFromPerks() {
-		if(perksRequired==null)
+		if(perksRequired==null) {
 			return false;
-		
+		}
 		for (AbstractPerk p : perksRequired) {
 			if(!Main.game.getPlayer().hasPerkAnywhereInTree(p)) {
 				return true;

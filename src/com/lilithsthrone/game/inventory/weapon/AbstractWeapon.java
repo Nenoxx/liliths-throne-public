@@ -243,10 +243,7 @@ public abstract class AbstractWeapon extends AbstractCoreItem implements XMLSavi
 		
 		try {
 			String id = parentElement.getAttribute("id");
-			if(id.equals("MAIN_WESTERN_KKP")) {	
-				id = "innoxia_western_kkp_western_kkp";
-			}
-			weapon = AbstractWeaponType.generateWeapon(WeaponType.idToWeaponMap.get(id), DamageType.valueOf(parentElement.getAttribute("damageType")));
+			weapon = AbstractWeaponType.generateWeapon(WeaponType.getWeaponTypeFromId(id), DamageType.valueOf(parentElement.getAttribute("damageType")));
 		} catch(Exception ex) {
 			ex.printStackTrace();
 			System.err.println("Warning: An instance of AbstractWeapon was unable to be imported. ("+parentElement.getAttribute("id")+")");
@@ -337,19 +334,31 @@ public abstract class AbstractWeapon extends AbstractCoreItem implements XMLSavi
 	public String getDescription() {
 		descriptionSB = new StringBuilder();
 		
+		int essenceCost = this.getWeaponType().getArcaneCost();
 		descriptionSB.append(
 					"<p>"
-						+ "<b>"
-							+ Attack.getMinimumDamage(Main.game.getPlayer(), null, Attack.MAIN, this) + "-" + Attack.getMaximumDamage(Main.game.getPlayer(), null, Attack.MAIN, this)
-						+ "</b>"
-						+ " <b style='color:"+ damageType.getMultiplierAttribute().getColour().toWebHexString() + ";'>"
-							+ damageType.getName()
-						+ "</b>"
-						+ " damage"
+						+ "<b>"+Attack.getMinimumDamage(Main.game.getPlayer(), null, Attack.MAIN, this) + "-" + Attack.getMaximumDamage(Main.game.getPlayer(), null, Attack.MAIN, this)+"</b>"
+						+ " <b style='color:"+ damageType.getMultiplierAttribute().getColour().toWebHexString() + ";'>"+ damageType.getName()+ "</b> damage"
+						+ "</br>"
+						+ "<b>"+(this.getWeaponType().isMelee()?"Melee":"Ranged")+" | "+(this.getWeaponType().isTwoHanded()?"Two-handed":"One-handed")+"</b>"
+						+ (essenceCost==0
+							?""
+							:"<br/><b>Costs [style.colourArcane("+essenceCost+" arcane essence"+(essenceCost==1?"":"s")+")] "+(this.getWeaponType().isMelee()?"per attack":"to fire")+"</b>")
 					+ "</p>"
 					+ "<p>"
 						+ weaponType.getDescription()
 					+ "</p>");
+		
+
+		// Physical resistance
+		if(getWeaponType().getPhysicalResistance()>0) {
+			descriptionSB.append("<p>"
+							+ (getWeaponType().isPlural()
+									? "They are armoured, and provide "
+									: "It is armoured, and provides ")
+								+ " <b>" + getWeaponType().getPhysicalResistance() + "</b> [style.colourResPhysical(" + Attribute.RESISTANCE_PHYSICAL.getName() + ")]."
+							+ "</p>");
+		}
 
 		if (!attributeModifiers.isEmpty()) {
 			descriptionSB.append("<p>It provides ");

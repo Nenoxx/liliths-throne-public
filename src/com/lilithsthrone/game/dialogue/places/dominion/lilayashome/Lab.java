@@ -29,7 +29,6 @@ import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.npcDialogue.dominion.DaddyDialogue;
 import com.lilithsthrone.game.dialogue.places.submission.LyssiethPalaceDialogue;
 import com.lilithsthrone.game.dialogue.responses.Response;
-import com.lilithsthrone.game.dialogue.responses.ResponseEffectsOnly;
 import com.lilithsthrone.game.dialogue.responses.ResponseSex;
 import com.lilithsthrone.game.dialogue.responses.ResponseTag;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
@@ -38,9 +37,9 @@ import com.lilithsthrone.game.inventory.enchanting.TFEssence;
 import com.lilithsthrone.game.inventory.item.AbstractItemType;
 import com.lilithsthrone.game.inventory.item.ItemType;
 import com.lilithsthrone.game.sex.Sex;
-import com.lilithsthrone.game.sex.managers.universal.SMChair;
 import com.lilithsthrone.game.sex.managers.universal.SMGeneric;
-import com.lilithsthrone.game.sex.positions.SexSlotOther;
+import com.lilithsthrone.game.sex.managers.universal.SMSitting;
+import com.lilithsthrone.game.sex.positions.slots.SexSlotSitting;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Colour;
 import com.lilithsthrone.utils.Util;
@@ -50,7 +49,7 @@ import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.1.75
- * @version 0.3.2
+ * @version 0.3.5
  * @author Innoxia
  */
 public class Lab {
@@ -80,7 +79,15 @@ public class Lab {
 		}
 
 		@Override
+		public String getResponseTabTitle(int index) {
+			return LilayaHomeGeneric.getLilayasHouseStandardResponseTabs(index);
+		}
+		
+		@Override
 		public Response getResponse(int responseTab, int index) {
+			if(responseTab==1) {
+				return LilayaHomeGeneric.getLilayasHouseFastTravelResponses(index);
+			}
 			if(index==1) {
 				if(Main.game.getNpc(Lilaya.class).getBaseFetishDesire(Fetish.FETISH_PREGNANCY).isNegative()) {
 					if(Main.game.getNpc(Lilaya.class).hasStatusEffect(StatusEffect.PREGNANT_0)) {
@@ -103,22 +110,6 @@ public class Lab {
 					}
 				};
 				
-			} else if (index == 6) {
-				return new ResponseEffectsOnly("Entrance hall", "Fast travel to the entrance hall."){
-					@Override
-					public void effects() {
-						Main.game.setActiveWorld(Main.game.getWorlds().get(WorldType.LILAYAS_HOUSE_GROUND_FLOOR), PlaceType.LILAYA_HOME_ENTRANCE_HALL, true);
-					}
-				};
-	
-			} else if (index == 7) {
-				return new ResponseEffectsOnly("Your Room", "Fast travel up to your room."){
-					@Override
-					public void effects() {
-						Main.game.setActiveWorld(Main.game.getWorlds().get(WorldType.LILAYAS_HOUSE_FIRST_FLOOR), PlaceType.LILAYA_HOME_ROOM_PLAYER, true);
-					}
-				};
-
 			} else {
 				return null;
 			}
@@ -283,61 +274,63 @@ public class Lab {
 				});
 			}
 		}
-		if(Main.game.getPlayer().getQuest(QuestLine.SIDE_DADDY) == Quest.DADDY_ACCEPTED) {
-			if(!Daddy.isAvailable()) {
-				generatedResponses.add(new Response("Meeting [daddy.name]", Daddy.getAvailabilityText(), null));
-				
-			} else if(Main.game.getPlayer().hasCompanions()) {
-				generatedResponses.add(new Response("Meeting [daddy.name]",
-						"[style.italicsBad(You cannot ask Lilaya to go with you and meet [daddy.name] while you have companions in your party!)]",
-						null));
-				
-			} else {
-				generatedResponses.add(new Response("Meeting [daddy.name]", "Convince Lilaya to go out for dinner with you and [daddy.name].", DaddyDialogue.CONVINCING_LILAYA) {
-					@Override
-					public void effects() {
-						setEntryFlags();
-						Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().setQuestProgress(QuestLine.SIDE_DADDY, Quest.DADDY_LILAYA_MEETING));
-					}
-				});
-				
-			}
-
-		} else if(Main.game.getPlayer().isQuestProgressGreaterThan(QuestLine.SIDE_DADDY, Quest.DADDY_LILAYA_MEETING)) {
-			if(!Daddy.isAvailable()) {
-				generatedResponses.add(new Response("Visit [daddy.name]", Daddy.getAvailabilityText(), null));
-				
-			} else if(Main.game.getPlayer().hasCompanions()) {
-				generatedResponses.add(new Response("Visit [daddy.name]",
-						"[style.italicsBad(You cannot ask Lilaya to go with you and vist [daddy.name] while you have companions in your party!)]",
-						null));
-				
-			} else  {
-				generatedResponses.add(new Response("Visit [daddy.name]", "Ask Lilaya if she'd like to join you in paying [daddy.name] a visit.", DaddyDialogue.MEETING) {
-					@Override
-					public int getSecondsPassed() {
-						return 30*60;
-					}
-					@Override
-					public void effects() {
-						setEntryFlags();
-						((Lilaya) Main.game.getNpc(Lilaya.class)).applyDinnerDateChange();
-						
-						Main.game.getPlayer().setLocation(WorldType.DADDYS_APARTMENT, PlaceType.DADDY_APARTMENT_ENTRANCE);
-						Main.game.getNpc(Lilaya.class).setLocation(Main.game.getPlayer(), false);
-
-						if(Main.game.getPlayer().isVisiblyPregnant() && !Main.game.getPlayer().isCharacterReactedToPregnancy(Main.game.getNpc(Daddy.class))) {
-							Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().incrementMoney(500));
+		
+		if(Main.game.getPlayer().hasQuest(QuestLine.SIDE_DADDY)) {
+			if(Main.game.getPlayer().getQuest(QuestLine.SIDE_DADDY) == Quest.DADDY_ACCEPTED) {
+				if(!Daddy.isAvailable()) {
+					generatedResponses.add(new Response("Meeting [daddy.name]", Daddy.getAvailabilityText(), null));
+					
+				} else if(Main.game.getPlayer().hasCompanions()) {
+					generatedResponses.add(new Response("Meeting [daddy.name]",
+							"[style.italicsBad(You cannot ask Lilaya to go with you and meet [daddy.name] while you have companions in your party!)]",
+							null));
+					
+				} else {
+					generatedResponses.add(new Response("Meeting [daddy.name]", "Convince Lilaya to go out for dinner with you and [daddy.name].", DaddyDialogue.CONVINCING_LILAYA) {
+						@Override
+						public void effects() {
+							setEntryFlags();
+							Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().setQuestProgress(QuestLine.SIDE_DADDY, Quest.DADDY_LILAYA_MEETING));
 						}
-						if(Main.game.getNpc(Lilaya.class).isVisiblyPregnant() && !Main.game.getNpc(Lilaya.class).isCharacterReactedToPregnancy(Main.game.getNpc(Daddy.class))) {
-							Main.game.getTextEndStringBuilder().append(Main.game.getNpc(Lilaya.class).incrementMoney(500));
+					});
+					
+				}
+	
+			} else if(Main.game.getPlayer().isQuestProgressGreaterThan(QuestLine.SIDE_DADDY, Quest.DADDY_LILAYA_MEETING)) {
+				if(!Daddy.isAvailable()) {
+					generatedResponses.add(new Response("Visit [daddy.name]", Daddy.getAvailabilityText(), null));
+					
+				} else if(Main.game.getPlayer().hasCompanions()) {
+					generatedResponses.add(new Response("Visit [daddy.name]",
+							"[style.italicsBad(You cannot ask Lilaya to go with you and vist [daddy.name] while you have companions in your party!)]",
+							null));
+					
+				} else  {
+					generatedResponses.add(new Response("Visit [daddy.name]", "Ask Lilaya if she'd like to join you in paying [daddy.name] a visit.", DaddyDialogue.MEETING) {
+						@Override
+						public int getSecondsPassed() {
+							return 30*60;
 						}
-					}
-				});
-				
+						@Override
+						public void effects() {
+							setEntryFlags();
+							((Lilaya) Main.game.getNpc(Lilaya.class)).applyDinnerDateChange();
+							
+							Main.game.getPlayer().setLocation(WorldType.DADDYS_APARTMENT, PlaceType.DADDY_APARTMENT_ENTRANCE);
+							Main.game.getNpc(Lilaya.class).setLocation(Main.game.getPlayer(), false);
+	
+							if(Main.game.getPlayer().isVisiblyPregnant() && !Main.game.getPlayer().isCharacterReactedToPregnancy(Main.game.getNpc(Daddy.class))) {
+								Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().incrementMoney(500));
+							}
+							if(Main.game.getNpc(Lilaya.class).isVisiblyPregnant() && !Main.game.getNpc(Lilaya.class).isCharacterReactedToPregnancy(Main.game.getNpc(Daddy.class))) {
+								Main.game.getTextEndStringBuilder().append(Main.game.getNpc(Lilaya.class).incrementMoney(500));
+							}
+						}
+					});
+					
+				}
 			}
 		}
-
 		
 		
 		return generatedResponses;
@@ -1173,7 +1166,7 @@ public class Lab {
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
 				return new Response(
-						Main.game.getPlayer().getLegConfiguration().isBipedalPositionedGenitals()
+						!Main.game.getPlayer().isTaur()
 							?"Sit down"
 							:"Step forwards",
 						"You know exactly why Lilaya seems embarrassed about these 'tests'...",
@@ -1211,14 +1204,14 @@ public class Lab {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				if(Main.game.getPlayer().getLegConfiguration().isBipedalPositionedGenitals()) {
+				if(!Main.game.getPlayer().isTaur()) {
 					return new ResponseSex("Sex",
 							"Start having sex with Lilaya.",
 							Util.newArrayListOfValues(Fetish.FETISH_INCEST), null, CorruptionLevel.FOUR_LUSTFUL, null, null, null,
 							true, true,
-							new SMChair(
-									Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotOther.SITTING)),
-									Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lilaya.class), SexSlotOther.SITTING_IN_LAP))),
+							new SMSitting(
+									Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotSitting.SITTING)),
+									Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lilaya.class), SexSlotSitting.SITTING_IN_LAP))),
 							null,
 							null,
 							LILAYA_END_SEX,
@@ -1336,16 +1329,16 @@ public class Lab {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				if(Main.game.getPlayer().getLegConfiguration().isBipedalPositionedGenitals()) {
+				if(!Main.game.getPlayer().isTaur()) {
 					return new ResponseSex("Let it happen",
 							Main.game.getPlayer().hasFetish(Fetish.FETISH_INCEST)
 								?"You know that this can only end one way, and the fact that Lilaya reminds you of your aunt Lily only makes it all the more exciting..."
 								:"You know that this can only end one way. Although Lilaya reminds you of your [lilaya.relation(pc)] Lily, you don't think it will get in the way of you enjoying this...",
 							Util.newArrayListOfValues(Fetish.FETISH_INCEST), null, CorruptionLevel.FOUR_LUSTFUL, null, null, null,
 							true, true,
-							new SMChair(
-									Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotOther.SITTING)),
-									Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lilaya.class), SexSlotOther.SITTING_IN_LAP))),
+							new SMSitting(
+									Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotSitting.SITTING)),
+									Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lilaya.class), SexSlotSitting.SITTING_IN_LAP))),
 							null,
 							null,
 							LILAYA_END_SEX,
@@ -1530,7 +1523,12 @@ public class Lab {
 	};
 
 	public static final DialogueNode LILAYA_ASSISTS_PREGNANCY = new DialogueNode("", "", true, true) {
-
+		
+		@Override
+		public int getSecondsPassed() {
+			return 5*60;
+		}
+		
 		@Override
 		public String getContent() {
 			PlayerCharacter player = Main.game.getPlayer();
@@ -1734,6 +1732,11 @@ public class Lab {
 	};
 	
 	public static final DialogueNode LILAYA_ASSISTS_PREGNANCY_REPEAT = new DialogueNode("", "", true, true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 30;
+		}
 
 		@Override
 		public String getContent() {
@@ -1789,6 +1792,11 @@ public class Lab {
 	};
 	
 	public static final DialogueNode LILAYA_DETECTS_BIRTHING_TYPE = new DialogueNode("", "", true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 2*60;
+		}
 
 		@Override
 		public String getLabel() {
@@ -1885,6 +1893,11 @@ public class Lab {
 	};
 	
 	public static final DialogueNode LILAYA_ASSISTS_BIRTHING = new DialogueNode("", "", true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 10*60;
+		}
 
 		@Override
 		public String getLabel() {
@@ -1948,6 +1961,11 @@ public class Lab {
 	};
 
 	public static final DialogueNode LILAYA_ASSISTS_BIRTHING_DELIVERS = new DialogueNode("", "", true, true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 240*60;
+		}
 
 		@Override
 		public String getContent() {
@@ -2039,6 +2057,11 @@ public class Lab {
 	};
 	
 	public static final DialogueNode LILAYA_ASSISTS_BIRTHING_KNOCK_OUT = new DialogueNode("Your room", "", true, true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 240*60;
+		}
 
 		@Override
 		public String getContent() {
@@ -2094,6 +2117,11 @@ public class Lab {
 	};
 	
 	public static final DialogueNode LILAYA_ASSISTS_EGG_LAYING = new DialogueNode("", "", true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 10*60;
+		}
 
 		@Override
 		public String getLabel() {
@@ -2179,6 +2207,11 @@ public class Lab {
 	};
 	
 	public static final DialogueNode LILAYA_ASSISTS_EGG_LAYING_DELIVERS = new DialogueNode("", "", true, true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 30*60;
+		}
 
 		@Override
 		public String getContent() {
@@ -2244,6 +2277,11 @@ public class Lab {
 	};
 	
 	public static final DialogueNode LILAYA_ASSISTS_EGG_LAYING_PROTECT_THE_EGGS = new DialogueNode("", "", true, true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 24*60*60;
+		}
 
 		@Override
 		public String getContent() {
@@ -2354,6 +2392,11 @@ public class Lab {
 	
 	private static StringBuilder litterSB;
 	public static final DialogueNode LILAYA_ASSISTS_BIRTHING_FINISHED = new DialogueNode("Your room", "", true, true) {
+		
+		@Override
+		public int getSecondsPassed() {
+			return 2*60;
+		}
 
 		@Override
 		public String getContent() {
@@ -2458,7 +2501,7 @@ public class Lab {
 					+ "</p>"
 					+ "<p>"
 						+ "You notice Arthur glance across to Lilaya, and the pair of them exchange a slightly worried look, before he continues,"
-						+ " [arthur.speech(Anyway, when I returned, I discovered that Amber had already called for the enforcers."
+						+ " [arthur.speech(Anyway, when I returned, I discovered that Amber had already called for the Enforcers."
 							+ " After immediately being enslaved for 'treason', I was quickly shunted through the legal process, and, through a series of bribes, Zaranix quickly gained possession of me."
 							+ " It turned out that he'd been watching me for months, waiting for me to make a mistake so that he could get me enslaved."
 							+ " He was under the rather deluded impression that I'd be able to make a demonic transformative, among other things, and that I'd make him rich.)]"

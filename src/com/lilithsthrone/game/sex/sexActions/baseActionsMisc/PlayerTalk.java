@@ -16,27 +16,25 @@ import com.lilithsthrone.game.sex.SexAreaPenetration;
 import com.lilithsthrone.game.sex.SexPace;
 import com.lilithsthrone.game.sex.SexParticipantType;
 import com.lilithsthrone.game.sex.SexType;
-import com.lilithsthrone.game.sex.positions.SexPositionBipeds;
-import com.lilithsthrone.game.sex.positions.SexSlotBipeds;
+import com.lilithsthrone.game.sex.positions.slots.SexSlotTag;
 import com.lilithsthrone.game.sex.sexActions.SexAction;
 import com.lilithsthrone.game.sex.sexActions.SexActionType;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
-import com.lilithsthrone.utils.Util.Value;
 
 /**
  * @since 0.1.79
- * @version 0.3.3.10
+ * @version 0.3.4.5
  * @author Innoxia
  */
 public class PlayerTalk {
 	
 	public static final SexAction DIRTY_TALK = new SexAction(
-			SexActionType.REQUIRES_NO_PENETRATION,
+			SexActionType.ONGOING,
 			ArousalIncrease.TWO_LOW,
 			ArousalIncrease.TWO_LOW,
 			CorruptionLevel.ONE_VANILLA,
-			Util.newHashMapOfValues(new Value<>(SexAreaOrifice.MOUTH, null)),
+			null,
 			SexParticipantType.NORMAL) {
 		
 		@Override
@@ -122,7 +120,7 @@ public class PlayerTalk {
 				}
 			}
 			
-			if(Sex.getPosition()==SexPositionBipeds.DOGGY_STYLE && Sex.getSexPositionSlot(Main.game.getPlayer())==SexSlotBipeds.DOGGY_ON_ALL_FOURS) {
+			if(Sex.getSexPositionSlot(Main.game.getPlayer()).hasTag(SexSlotTag.ALL_FOURS)) {
 				
 				switch(Sex.getSexPace(Main.game.getPlayer())) {
 					case SUB_EAGER:
@@ -142,7 +140,7 @@ public class PlayerTalk {
 								+ Main.game.getPlayer().getDirtyTalk();
 				}
 				
-			} else if(Sex.getPosition()==SexPositionBipeds.KNEELING_ORAL && Sex.getSexPositionSlot(Sex.getActivePartner())==SexSlotBipeds.KNEELING_PERFORMING_ORAL) {
+			} else if(Sex.getSexPositionSlot(Sex.getCharacterTargetedForSexAction(this)).hasTag(SexSlotTag.PERFORMING_ORAL)) {
 				
 				switch(Sex.getSexPace(Main.game.getPlayer())) {
 					case DOM_GENTLE:
@@ -162,7 +160,7 @@ public class PlayerTalk {
 								+ Main.game.getPlayer().getDirtyTalk();
 				}
 				
-			} else if(Sex.getPosition()==SexPositionBipeds.KNEELING_ORAL && Sex.getSexPositionSlot(Main.game.getPlayer())==SexSlotBipeds.KNEELING_PERFORMING_ORAL) {
+			} else if(Sex.getSexPositionSlot(Main.game.getPlayer()).hasTag(SexSlotTag.PERFORMING_ORAL)) {
 				
 				switch(Sex.getSexPace(Main.game.getPlayer())) {
 					case SUB_EAGER:
@@ -182,7 +180,7 @@ public class PlayerTalk {
 								+ Main.game.getPlayer().getDirtyTalk();
 				}
 				
-			} else if(Sex.getPosition()==SexPositionBipeds.SIXTY_NINE && Sex.getSexPositionSlot(Main.game.getPlayer())==SexSlotBipeds.SIXTY_NINE_TOP) {
+			} else if(Sex.getSexPositionSlot(Main.game.getPlayer()).hasTag(SexSlotTag.SIXTY_NINE)) {
 				
 				switch(Sex.getSexPace(Main.game.getPlayer())) {
 					case DOM_GENTLE:
@@ -955,8 +953,8 @@ public class PlayerTalk {
 			return Main.game.getPlayer().isBreastFuckablePaizuri()
 					&& !Sex.getRequestsBlocked(Main.game.getPlayer()).contains(new SexType(SexParticipantType.NORMAL, null, SexAreaOrifice.BREAST))
 					&& Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.BREASTS, true)
-					&& Sex.getActivePartner().hasPenis()
-					&& Sex.getActivePartner().isAreaKnownByCharacter(CoverableArea.PENIS, Main.game.getPlayer())
+					&& Sex.getCharacterTargetedForSexAction(this).hasPenis()
+					&& Sex.getCharacterTargetedForSexAction(this).isAreaKnownByCharacter(CoverableArea.PENIS, Main.game.getPlayer())
 					&& Sex.getCharacterPerformingAction().isPlayer();
 		}
 
@@ -1033,8 +1031,8 @@ public class PlayerTalk {
 			return !Main.game.getPlayer().isBreastFuckablePaizuri()
 					&& !Sex.getRequestsBlocked(Main.game.getPlayer()).contains(new SexType(SexParticipantType.NORMAL, null, SexAreaOrifice.BREAST))
 					&& Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.BREASTS, true)
-					&& Sex.getActivePartner().hasPenis()
-					&& Sex.getActivePartner().isAreaKnownByCharacter(CoverableArea.PENIS, Main.game.getPlayer())
+					&& Sex.getCharacterTargetedForSexAction(this).hasPenis()
+					&& Sex.getCharacterTargetedForSexAction(this).isAreaKnownByCharacter(CoverableArea.PENIS, Main.game.getPlayer())
 					&& Sex.getCharacterPerformingAction().isPlayer();
 		}
 

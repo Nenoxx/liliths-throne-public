@@ -55,7 +55,7 @@ public class PixShower {
 
 		@Override
 		public boolean isBaseRequirementsMet() {
-			return Sex.isOrificeFree(Sex.getActivePartner(), SexAreaOrifice.MOUTH) && Sex.isOrificeFree(Main.game.getPlayer(), SexAreaOrifice.MOUTH);
+			return Sex.isOrificeFree(Sex.getCharacterTargetedForSexAction(this), SexAreaOrifice.MOUTH) && Sex.isOrificeFree(Main.game.getPlayer(), SexAreaOrifice.MOUTH);
 		}
 
 		@Override
@@ -509,12 +509,12 @@ public class PixShower {
 
 		@Override
 		public boolean isBaseRequirementsMet() {
-			return Sex.isPenetrationTypeFree(Sex.getActivePartner(), SexAreaPenetration.FINGER);
+			return Sex.isPenetrationTypeFree(Sex.getCharacterPerformingAction(), SexAreaPenetration.FINGER);
 		}
 
 		@Override
 		public String getDescription() {
-			return UtilText.parse(Sex.getActivePartner(),
+			return UtilText.parse(Sex.getCharacterPerformingAction(),
 					UtilText.returnStringAtRandom(
 					"Reaching around between your legs, Pix suddenly grabs your [pc.cock+], and as she starts stroking up and down its length, you find yourself letting out [pc.a_moan+] and leaning back into her.",
 					
@@ -540,7 +540,7 @@ public class PixShower {
 		}
 		@Override
 		public String getActionTitle() {
-			return "Start fingering the player";
+			return "Start fingering";
 		}
 
 		@Override
@@ -555,7 +555,7 @@ public class PixShower {
 
 		@Override
 		public String getDescription() {
-			return UtilText.parse(Sex.getActivePartner(),
+			return UtilText.parse(Sex.getCharacterPerformingAction(),
 					"You feel Pix press heavily into your back, and as she growls menacingly into your ear, she reaches around with [pix.a_hand+] to start stroking and probing at your outer labia."
 						+ " With [pc.a_moan+], you lean back into her, and as the sound of falling water echoes off the walls all around you, she suddenly thrusts her [pix.fingers+] up, penetrating your [pc.pussy+] in one swift strike.");
 		}
@@ -723,12 +723,12 @@ public class PixShower {
 		@Override
 		public String getDescription() {
 			return "Pix suddenly slams you up against the wall, and, leaning in over your shoulder, she starts softly growling into your ear, "
-						+"[npc.speech(Y'know, I've got a little deal for you, so hear me out, ok?"
+						+"[npc.speechNoEffects(Y'know, I've got a little deal for you, so hear me out, ok?"
 						+ " So, like, what's going to happen here, is that when you feel close to getting off, you're gonna promise me that you're gonna come back and do more training in the future, ok?"
 						+ " And I mean a <i>real</i> promise!)]"
 					+ "<br/><br/>"
 					+ "You aren't really in any position to interrupt, so as Pix continues to press you up against the wall, you listen to her as she offers you her 'deal', "
-					+"[npc.speech(Y'know, I can keep doing this all day, so when you're ready to cum for me, you're gonna promise that you're gonna come back to train, ok?!"
+					+"[npc.speechNoEffects(Y'know, I can keep doing this all day, so when you're ready to cum for me, you're gonna promise that you're gonna come back to train, ok?!"
 					+ " And if you don't promise, I'm not gonna let you get off!"
 					+ " I sure hope you're listening, 'cause I'm like, totally serious here!)]"
 					+ "<br/><br/>"
@@ -930,7 +930,7 @@ public class PixShower {
 	};
 	
 	public static final SexAction PLAYER_ORGASM_REFUSE = new SexAction(
-			SexActionType.ORGASM_NO_AROUSAL_RESET,
+			SexActionType.ORGASM_DENIAL,
 			ArousalIncrease.NEGATIVE_MAJOR,
 			ArousalIncrease.ZERO_NONE,
 			CorruptionLevel.ZERO_PURE,
