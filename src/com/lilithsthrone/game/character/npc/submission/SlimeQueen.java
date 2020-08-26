@@ -65,7 +65,7 @@ import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.2.6
- * @version 0.3
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public class SlimeQueen extends NPC {
@@ -92,7 +92,7 @@ public class SlimeQueen extends NPC {
 			resetBodyAfterVersion_2_10_5();
 		}
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.2.12") && Subspecies.getFleshSubspecies(this)!=Subspecies.HUMAN) {
-			this.setBody(Gender.F_V_B_FEMALE, Subspecies.SLIME, RaceStage.HUMAN);
+			this.setBody(Gender.F_V_B_FEMALE, Subspecies.SLIME, RaceStage.HUMAN, false);
 		}
 
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.2")) {
@@ -110,6 +110,19 @@ public class SlimeQueen extends NPC {
 					PersonalityTrait.INNOCENT,
 					PersonalityTrait.CONFIDENT);
 		}
+		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.5.6")) {
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME, Colour.SLIME_PINK), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_EYE, Colour.SLIME_PINK), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_SCLERA, Colour.SLIME_PINK_LIGHT), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_PUPILS, Colour.SLIME_PINK_DARK), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_ANUS, CoveringPattern.ORIFICE_ANUS, Colour.SLIME_PINK_DARK, false, Colour.SLIME_PINK_DARK, true), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_HAIR, Colour.SLIME_PINK_DARK), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_MOUTH, CoveringPattern.ORIFICE_MOUTH, Colour.SLIME_PINK_DARK, false, Colour.SLIME_PINK_DARK, true), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_NIPPLES, Colour.SLIME_PINK_DARK), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_VAGINA, CoveringPattern.ORIFICE_VAGINA, Colour.SLIME_PINK_DARK, false, Colour.SLIME_PINK_DARK, true), false);
+			this.setSkinCovering(new Covering(BodyCoveringType.SLIME_PENIS, CoveringPattern.NONE, Colour.SLIME_PINK_DARK, false, Colour.SLIME_PINK_DARK, true), false);	
+		}
+		
 		setStartingCombatMoves();
 	}
 
@@ -261,8 +274,8 @@ public class SlimeQueen extends NPC {
 		}
 		
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.WRIST_BANGLE, Colour.CLOTHING_GOLD, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.FINGER_RING, Colour.CLOTHING_GOLD, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.NECK_HEART_NECKLACE, Colour.CLOTHING_GOLD, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_finger_ring", Colour.CLOTHING_GOLD, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_neck_heart_necklace", Colour.CLOTHING_GOLD, Colour.CLOTHING_GOLD, Colour.CLOTHING_GOLD, false), true, this);
 
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.PIERCING_EAR_HOOPS, Colour.CLOTHING_GOLD, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.PIERCING_NAVEL_GEM, Colour.CLOTHING_GOLD, false), true, this);

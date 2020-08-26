@@ -19,8 +19,10 @@ import com.lilithsthrone.game.dialogue.DialogueFlagValue;
 import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.places.dominion.EnforcerWarehouse;
 import com.lilithsthrone.game.dialogue.places.submission.dicePoker.DicePokerTable;
+import com.lilithsthrone.game.dialogue.places.submission.gamblingDen.GamblingDenDialogue;
 import com.lilithsthrone.game.dialogue.places.submission.impFortress.ImpCitadelDialogue;
 import com.lilithsthrone.game.dialogue.places.submission.impFortress.ImpFortressDialogue;
+import com.lilithsthrone.game.dialogue.places.submission.ratWarrens.RatWarrensDialogue;
 import com.lilithsthrone.game.dialogue.responses.Response;
 import com.lilithsthrone.game.dialogue.responses.ResponseEffectsOnly;
 import com.lilithsthrone.game.dialogue.responses.ResponseSex;
@@ -108,8 +110,8 @@ public class SubmissionGenericPlaces {
 			
 			if(!pacified) {
 				UtilText.nodeContentSB.append(
-						"<span color:"+Main.game.getPlayer().getLocationPlace().getPlaceType().getColourString()+";>"
-						+ UtilText.parseFromXMLFile("places/submission/submissionPlaces", "TUNNEL_IMP_CONTROL")
+						"<span style='color:"+Main.game.getPlayer().getLocationPlace().getPlaceType().getColourString()+";'>"
+								+ UtilText.parseFromXMLFile("places/submission/submissionPlaces", "TUNNEL_IMP_CONTROL")
 						+"</span>");
 			}
 			
@@ -167,26 +169,101 @@ public class SubmissionGenericPlaces {
 		}
 	};
 	
-	public static final DialogueNode RAT_WARREN = new DialogueNode("The Rat Warren", "", false) {
-
+	public static final DialogueNode RAT_WARREN = new DialogueNode("Rat Warrens", "", false) {
 		@Override
 		public int getSecondsPassed() {
 			return 3*60;
 		}
+		@Override
+		public String getContent() {
+			if(Main.game.getPlayer().hasQuestInLine(QuestLine.SIDE_VENGAR, Quest.VENGAR_THREE_END)) {
+				return UtilText.parseFromXMLFile("places/submission/submissionPlaces", "RAT_WARREN_CLOSED");
+			}
+			return UtilText.parseFromXMLFile("places/submission/submissionPlaces", "RAT_WARREN");
+		}
+		@Override
+		public Response getResponse(int responseTab, int index) {
+			if(!Main.game.getPlayer().hasQuestInLine(QuestLine.SIDE_VENGAR, Quest.VENGAR_THREE_END)) {
+				if(index==1) {
+					return new Response("Knock",
+							"Knock on the door and wait to see if anyone answers.",
+							RAT_WARREN_KNOCK_ON_DOOR) {
+						@Override
+						public void effects() {
+							RatWarrensDialogue.init();
+							Main.game.getPlayer().setLocation(WorldType.RAT_WARRENS, PlaceType.RAT_WARRENS_ENTRANCE);
+						}
+					};
+				}
+			}
+			return null;
+		}
+	};
+	
+	public static final DialogueNode RAT_WARREN_KNOCK_ON_DOOR = new DialogueNode("Rat Warrens", "", true) {
+
+		@Override
+		public int getSecondsPassed() {
+			return 2*60;
+		}
 		
 		@Override
 		public String getContent() {
-			return UtilText.parseFromXMLFile("places/submission/submissionPlaces", "RAT_WARREN");
+			return UtilText.parseFromXMLFile("places/submission/submissionPlaces", "RAT_WARREN_KNOCK_ON_DOOR", RatWarrensDialogue.getGuards(false));
 		}
 
 		@Override
 		public Response getResponse(int responseTab, int index) {
-			if (index == 1) {
-				return new Response("Knock", "Knock on the door. <b>Not yet added!</b> (This will be a mini-area, which will be related to a large side-quest.)", null);
-
-			} else {
-				return null;
+			boolean freeEntry = Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensEntry) || Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensEntryWhore);
+			if(index == 1) {
+				if(!Main.game.getPlayer().hasQuest(QuestLine.SIDE_VENGAR)) {
+					return new Response("Enter",
+							"You're not able to gain access to the Rat Warrens without a good reason...",
+							null);
+				} else {
+					if(freeEntry) {
+						return new Response("Enter",
+								"As the guards have recognised you, you're able to freely enter the Rat Warrens.",
+								RatWarrensDialogue.RAT_WARREN_INITIAL_ENTRY);
+					}
+					return new Response("Explain",
+							"Tell the guards that you've come here to do business with Vengar, on behalf of Axel.",
+							RatWarrensDialogue.RAT_WARREN_INITIAL_ENTRY);
+				}
+				
+			} else if(index==2) {
+				return new Response("Step back",
+						freeEntry
+							?"Decide against entering the Rat Warrens, and instead step away from the door."
+							:"As you don't have any business here, you're not going to be able to get in. It would be best to step back and take your leave before the guards follow through on their threats...",
+						RAT_WARREN_STEP_BACK) {
+					@Override
+					public void effects() {
+						if(freeEntry) {
+							Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("places/submission/submissionPlaces", "RAT_WARREN_ENTRY_STEP_BACK", RatWarrensDialogue.getGuards(false)));
+						} else {
+							Main.game.getTextStartStringBuilder().append(UtilText.parseFromXMLFile("places/submission/submissionPlaces", "RAT_WARREN_STEP_BACK", RatWarrensDialogue.getGuards(false)));
+						}
+						RatWarrensDialogue.exit();
+					}
+				};
 			}
+			return null;
+		}
+	};
+	
+	public static final DialogueNode RAT_WARREN_STEP_BACK = new DialogueNode("Rat Warrens", "", false) {
+		@Override
+		public int getSecondsPassed() {
+			return 1*60;
+		}
+		@Override
+		public String getContent() {
+			return "";
+		}
+		@Override
+		public Response getResponse(int responseTab, int index) {
+			return RAT_WARREN.getResponse(responseTab, index);
 		}
 	};
 
@@ -990,6 +1067,17 @@ public class SubmissionGenericPlaces {
 					return null;
 				}
 				
+			} else if(index==5
+					&& Main.game.getPlayer().hasQuest(QuestLine.SIDE_VENGAR)
+					&& !Main.game.getPlayer().isSubQuestCompleted(Quest.VENGAR_OPTIONAL_CLAIRE, QuestLine.SIDE_VENGAR)) {
+				return new Response("Vengar", "Ask for Claire's help with dealing with Vengar.", CLAIRE_VENGAR_HELP) {
+					@Override
+					public void effects() {
+						applyClaireMeetingEffects();
+					}
+				};
+				
+				
 			} else if(index == 6 && Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.claireAskedTeleportation)) {
 				if(!Main.game.getPlayer().hasQuest(QuestLine.SIDE_TELEPORTATION) || !Main.game.getPlayer().isQuestCompleted(QuestLine.SIDE_TELEPORTATION)) {
 					return new Response("Teleportation pads",
@@ -1043,7 +1131,7 @@ public class SubmissionGenericPlaces {
 		}
 	};
 	
-	public static final DialogueNode CLAIRE_INFO_REPORT_BACK = new DialogueNode("Enforcer Checkpoint", "", true) {
+	public static final DialogueNode CLAIRE_INFO_REPORT_BACK = new DialogueNode("", "", true) {
 
 		@Override
 		public int getSecondsPassed() {
@@ -1066,7 +1154,7 @@ public class SubmissionGenericPlaces {
 		}
 	};
 
-	public static final DialogueNode CLAIRE_INFO_SLIME_QUEEN_REPORT_BACK = new DialogueNode("Enforcer Checkpoint", "", true) {
+	public static final DialogueNode CLAIRE_INFO_SLIME_QUEEN_REPORT_BACK = new DialogueNode("", "", true) {
 
 		@Override
 		public int getSecondsPassed() {
@@ -1090,6 +1178,53 @@ public class SubmissionGenericPlaces {
 			} else {
 				return null;
 			}
+		}
+	};
+	
+	public static final DialogueNode CLAIRE_VENGAR_HELP = new DialogueNode("", "", true) {
+
+		@Override
+		public int getSecondsPassed() {
+			return 2*60;
+		}
+		
+		@Override
+		public String getContent() {
+			return UtilText.parseFromXMLFile("places/submission/submissionPlaces", "CLAIRE_VENGAR_HELP");
+		}
+
+		@Override
+		public Response getResponse(int responseTab, int index) {
+			if(index==1) {
+				return new Response("Wait",
+						"Do as Claire asks and wait for her to return.",
+						CLAIRE_VENGAR_HELP_WAIT) {
+					@Override
+					public void effects() {
+						Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addOptionalQuestProgress(QuestLine.SIDE_VENGAR, Quest.VENGAR_OPTIONAL_CLAIRE));
+						Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addItem(AbstractItemType.generateItem(ItemType.RESONANCE_STONE), false, true));
+					}
+				};
+			}
+			return null;
+		}
+	};
+	
+	public static final DialogueNode CLAIRE_VENGAR_HELP_WAIT = new DialogueNode("", "", true, true) {
+
+		@Override
+		public int getSecondsPassed() {
+			return 10*60;
+		}
+		
+		@Override
+		public String getContent() {
+			return UtilText.parseFromXMLFile("places/submission/submissionPlaces", "CLAIRE_VENGAR_HELP_WAIT");
+		}
+
+		@Override
+		public Response getResponse(int responseTab, int index) {
+			return CLAIRE.getResponse(responseTab, index);
 		}
 	};
 	

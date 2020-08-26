@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,6 +29,7 @@ import com.lilithsthrone.game.character.npc.submission.ImpAttacker;
 import com.lilithsthrone.game.character.npc.submission.SlimeCavernAttacker;
 import com.lilithsthrone.game.character.npc.submission.SubmissionAttacker;
 import com.lilithsthrone.game.character.quests.QuestLine;
+import com.lilithsthrone.game.character.race.Race;
 import com.lilithsthrone.game.character.race.Subspecies;
 import com.lilithsthrone.game.combat.DamageType;
 import com.lilithsthrone.game.combat.Spell;
@@ -35,6 +37,7 @@ import com.lilithsthrone.game.dialogue.DialogueFlagValue;
 import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.companions.SlaveDialogue;
 import com.lilithsthrone.game.dialogue.npcDialogue.submission.TunnelImpsDialogue;
+import com.lilithsthrone.game.dialogue.places.submission.ratWarrens.VengarCaptiveDialogue;
 import com.lilithsthrone.game.inventory.ItemTag;
 import com.lilithsthrone.game.inventory.Rarity;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
@@ -58,7 +61,7 @@ import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.1.0
- * @version 0.3.4
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public enum Encounter {
@@ -76,7 +79,7 @@ public enum Encounter {
 					try {
 						NPC slave = (NPC) Main.game.getNPCById(id);
 						if(slave.hasSlavePermissionSetting(SlavePermissionSetting.SEX_INITIATE_PLAYER)
-								&& slave.getSlaveJob(Main.game.getHourOfDay())!=SlaveJob.IDLE
+								&& slave.getSlaveJob(Main.game.getHourOfDay())==SlaveJob.IDLE
 								&& slave.hasSlavePermissionSetting(SlavePermissionSetting.GENERAL_HOUSE_FREEDOM)
 								&& slave.isAttractedTo(Main.game.getPlayer())) {
 							if(slave.getLastTimeHadSex()+60*4<Main.game.getMinutesPassed()) {
@@ -296,10 +299,11 @@ public enum Encounter {
 				
 				if(Math.random()<IncestEncounterRate()) { // Incest
 					List<NPC> offspringAvailable = Main.game.getOffspringNotSpawned(
-						npc-> (npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.DOMINION)
+						npc-> ((npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.DOMINION)
 								|| npc.getSubspecies()==Subspecies.ANGEL
 								|| npc.getSubspecies()==Subspecies.FOX_ASCENDANT
-								|| npc.getSubspecies()==Subspecies.FOX_ASCENDANT_FENNEC));
+								|| npc.getSubspecies()==Subspecies.FOX_ASCENDANT_FENNEC)
+							&& (npc.getHalfDemonSubspecies()==null || npc.getHalfDemonSubspecies().getRace()!=Race.HARPY)));
 					
 					if(!offspringAvailable.isEmpty()) {
 						return SpawnAndStartChildHere(offspringAvailable);
@@ -417,10 +421,11 @@ public enum Encounter {
 				
 				if(Math.random()<IncestEncounterRate()) { // Incest
 					List<NPC> offspringAvailable = Main.game.getOffspringNotSpawned(
-						npc -> npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.DOMINION)
-							|| npc.getSubspecies()==Subspecies.SLIME
-							|| npc.getSubspecies()==Subspecies.ALLIGATOR_MORPH
-							|| npc.getSubspecies()==Subspecies.RAT_MORPH);
+						npc -> ((npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.DOMINION)
+									|| npc.getSubspecies()==Subspecies.SLIME
+									|| npc.getSubspecies()==Subspecies.ALLIGATOR_MORPH
+									|| npc.getSubspecies()==Subspecies.RAT_MORPH)
+								&& (npc.getHalfDemonSubspecies()==null || npc.getHalfDemonSubspecies().getRace()!=Race.HARPY)));
 					
 					if(!offspringAvailable.isEmpty()) {
 						return SpawnAndStartChildHere(offspringAvailable);
@@ -476,7 +481,8 @@ public enum Encounter {
 				
 				if(Math.random()<IncestEncounterRate()) { // Incest
 					List<NPC> offspringAvailable = Main.game.getOffspringNotSpawned(
-						npc -> npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.HARPY_NEST));
+						npc -> (npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.HARPY_NEST)
+								&& (npc.getHalfDemonSubspecies()==null || npc.getHalfDemonSubspecies().getRace()==Race.HARPY)));
 					
 					if(!offspringAvailable.isEmpty()) {
 						return SpawnAndStartChildHere(offspringAvailable);
@@ -564,7 +570,8 @@ public enum Encounter {
 				
 				if(Math.random()<IncestEncounterRate()) { // Incest
 					List<NPC> offspringAvailable = Main.game.getOffspringNotSpawned(
-						npc -> npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.HARPY_NEST));
+						npc -> (npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.HARPY_NEST)
+								&& (npc.getHalfDemonSubspecies()==null || npc.getHalfDemonSubspecies().getRace()==Race.HARPY)));
 					
 					if(!offspringAvailable.isEmpty()) {
 						return SpawnAndStartChildHere(offspringAvailable);
@@ -841,7 +848,8 @@ public enum Encounter {
 				
 				if(Math.random()<IncestEncounterRate()) {
 					List<NPC> offspringAvailable = Main.game.getOffspringNotSpawned(
-						npc -> npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.SUBMISSION));
+						npc -> (npc.getSubspecies().getWorldLocations().keySet().contains(WorldType.SUBMISSION)
+								&& (npc.getHalfDemonSubspecies()==null || npc.getHalfDemonSubspecies().getWorldLocations().keySet().contains(WorldType.SUBMISSION))));
 					
 					if(!offspringAvailable.isEmpty()) {
 						return SpawnAndStartChildHere(offspringAvailable);
@@ -929,8 +937,117 @@ public enum Encounter {
 				return null;
 			}
 		}
-	};
+	},
+	
+	// chance of encounters (in likelihood order):
+	//  If night, always taken to bedroom. If ready to give birth, birthing & sleep, else fucked & sleep
+	// 	Rats get you to serve drinks
+	//  Rats grope you
+	//  Vengar fucks you in front of everyone
+	//  A rat fucks you
+	// 	Rats fuck you
+	// 	Rat gets you to perform oral under table
+	VENGAR_CAPTIVE_HALL(null) {
+		@Override
+		public Map<EncounterType, Float> getDialogues() {
+			Map<EncounterType, Float> map = new HashMap<>();// Silence delivers if pregnant
+			
+			map.put(EncounterType.VENGAR_CAPTIVE_SERVE, 40f);
+			map.put(EncounterType.VENGAR_CAPTIVE_GROPED, 20f);
+			map.put(EncounterType.VENGAR_CAPTIVE_RAT_FUCK, 10f);
+			map.put(EncounterType.VENGAR_CAPTIVE_ORAL_UNDER_TABLE, 5f);
+			
+			// Once daily only:
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.vengarCaptiveVengarSatisfied)) {
+				map.put(EncounterType.VENGAR_CAPTIVE_VENGAR_FUCK, 10f);
+			}
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.vengarCaptiveGangBanged)) {
+				map.put(EncounterType.VENGAR_CAPTIVE_GROUP_SEX, 2f);
+			}
+			
+			return map;
+		}
+		@Override
+		protected DialogueNode getBaseRandomEncounter(boolean forceEncounter) {
+			if(!Main.game.isExtendedWorkTime()) {
+				return VengarCaptiveDialogue.VENGARS_HALL_NIGHT_TIME;
+			}
+			if(Main.game.getPlayer().hasStatusEffect(StatusEffect.PREGNANT_3)) {
+				return VengarCaptiveDialogue.VENGARS_HALL_DELIVERY;
+			}
+			if(Main.game.getPlayer().hasCompanions() && Main.game.getPlayer().getMainCompanion().hasStatusEffect(StatusEffect.PREGNANT_3)) {
+				return VengarCaptiveDialogue.VENGARS_HALL_DELIVERY;
+			}
+			return super.getBaseRandomEncounter(forceEncounter);
+		}
+		@Override
+		protected DialogueNode initialiseEncounter(EncounterType node) {
+			if(node == EncounterType.VENGAR_CAPTIVE_SERVE) {
+				return VengarCaptiveDialogue.VENGARS_HALL_SERVE;
+				
+			} else if(node == EncounterType.VENGAR_CAPTIVE_GROPED) {
+				return VengarCaptiveDialogue.VENGARS_HALL_GROPED;
+				
+			} else if(node == EncounterType.VENGAR_CAPTIVE_VENGAR_FUCK) {
+				return VengarCaptiveDialogue.VENGARS_HALL_VENGAR_FUCK;
+				
+			} else if(node == EncounterType.VENGAR_CAPTIVE_RAT_FUCK) {
+				return VengarCaptiveDialogue.VENGARS_HALL_RAT_FUCK;
+				
+			} else if(node == EncounterType.VENGAR_CAPTIVE_GROUP_SEX) {
+				return VengarCaptiveDialogue.VENGARS_HALL_GROUP_SEX;
+			}
+			
+			return null;
+		}
+	},
 
+	//  SS make you clean room
+	// 	Shadow & Silence use you
+	//  SS forbid you from sulking in room (if already cleaned)
+	VENGAR_CAPTIVE_BEDROOM(null) {
+		@Override
+		public Map<EncounterType, Float> getDialogues() {
+			Map<EncounterType, Float> map = new HashMap<>();
+			
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.vengarCaptiveRoomCleaned)) {
+				map.put(EncounterType.VENGAR_CAPTIVE_CLEAN_ROOM, 50f);
+			}
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.vengarCaptiveShadowSatisfied)
+					|| !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.vengarCaptiveSilenceSatisfied)) {
+				map.put(EncounterType.VENGAR_CAPTIVE_SHADOW_SILENCE_DOMINATE, 25f);
+			}
+			if(map.isEmpty()) {
+				map.put(EncounterType.VENGAR_CAPTIVE_ROOM_BARRED, 80f);
+			}
+			
+			return map;
+		}
+		@Override
+		protected DialogueNode getBaseRandomEncounter(boolean forceEncounter) {
+			if(!Main.game.isExtendedWorkTime()) {
+				return VengarCaptiveDialogue.VENGARS_BEDROOM_NIGHT_TIME;
+			}
+			return super.getBaseRandomEncounter(forceEncounter);
+		}
+		@Override
+		protected DialogueNode initialiseEncounter(EncounterType node) {
+			if(node == EncounterType.VENGAR_CAPTIVE_CLEAN_ROOM) {
+				return VengarCaptiveDialogue.VENGARS_BEDROOM_CLEAN;
+				
+			} else if(node == EncounterType.VENGAR_CAPTIVE_SHADOW_SILENCE_DOMINATE) {
+				return VengarCaptiveDialogue.VENGARS_BEDROOM_SHADOW_SILENCE;
+				
+			} else if(node == EncounterType.VENGAR_CAPTIVE_ROOM_BARRED) {
+				return VengarCaptiveDialogue.VENGARS_BEDROOM_BARRED;
+			}
+			
+			return null;
+		}
+	},
+	
+	;
+	
 	private static DialogueNode SpawnAndStartChildHere(List<NPC> offspringAvailable) {
 		NPC offspring = offspringAvailable.get(Util.random.nextInt(offspringAvailable.size()));
 		Main.game.getOffspringSpawned().add(offspring);
@@ -950,7 +1067,7 @@ public enum Encounter {
 			try {
 				NPC slave = (NPC) Main.game.getNPCById(id);
 				if(slave.hasSlavePermissionSetting(SlavePermissionSetting.SEX_INITIATE_PLAYER)
-						&& slave.getSlaveJob(Main.game.getHourOfDay())!=SlaveJob.IDLE
+						&& slave.getSlaveJob(Main.game.getHourOfDay())==SlaveJob.IDLE
 						&& slave.hasSlavePermissionSetting(SlavePermissionSetting.GENERAL_OUTSIDE_FREEDOM)
 						&& slave.isAttractedTo(Main.game.getPlayer())) {
 					if(slave.getLastTimeHadSex()+60*4<Main.game.getMinutesPassed()) {

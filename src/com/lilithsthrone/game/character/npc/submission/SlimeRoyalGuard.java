@@ -66,7 +66,7 @@ import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.2.6
- * @version 0.2.11
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public class SlimeRoyalGuard extends NPC {
@@ -92,7 +92,7 @@ public class SlimeRoyalGuard extends NPC {
 		}
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3")) {
 			this.setBodyMaterial(BodyMaterial.FLESH);
-			this.setBody(Gender.M_P_MALE, Subspecies.DEMON, RaceStage.GREATER);
+			this.setBody(Gender.M_P_MALE, Subspecies.DEMON, RaceStage.GREATER, false);
 			setStartingBody(true);
 		}
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.3.6")) {
@@ -247,7 +247,7 @@ public class SlimeRoyalGuard extends NPC {
 		this.equipMainWeaponFromNowhere(AbstractWeaponType.generateWeapon(WeaponType.MELEE_ZWEIHANDER, DamageType.PHYSICAL));
 		
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.GROIN_BRIEFS, Colour.CLOTHING_BLACK, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.LEG_CROTCHLESS_CHAPS, Colour.CLOTHING_BLACK, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_leg_crotchless_chaps", Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_sock_socks", Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_foot_work_boots", Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.STOMACH_SARASHI, Colour.CLOTHING_BLACK, false), true, this);

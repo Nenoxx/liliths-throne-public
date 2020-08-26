@@ -146,6 +146,7 @@ public class SexPositionUnique {
 		public Map<SexSlot, Map<SexSlot, SexActionInteractions>> getSlotTargets() {
 			List<Value<SexSlot, Map<SexSlot, SexActionInteractions>>> interactions = new ArrayList<>();
 			interactions.add(StandardSexActionInteractions.handHolding.getSexActionInteractions(SexSlotUnique.HAND_SEX_DOM_ROSE, SexSlotUnique.HAND_SEX_SUB_ROSE));
+			interactions.add(StandardSexActionInteractions.handHolding.getSexActionInteractions(SexSlotUnique.HAND_SEX_SUB_ROSE, SexSlotUnique.HAND_SEX_DOM_ROSE));
 			return generateSlotTargetsMap(interactions);
 		}
 	};
@@ -246,7 +247,6 @@ public class SexPositionUnique {
 		}
 		@Override
 		public boolean isActionBlocked(GameCharacter performer, GameCharacter target, SexActionInterface action) {
-			
 			if(Sex.getSexPositionSlot(performer) == SexSlotUnique.MISSIONARY_ALTAR_SEALED_LYING_ON_ALTAR) {
 				if((action.getActionType()==SexActionType.ONGOING
 						|| action.getActionType()==SexActionType.START_ONGOING

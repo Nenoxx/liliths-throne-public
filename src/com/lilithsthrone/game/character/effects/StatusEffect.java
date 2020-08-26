@@ -34,6 +34,8 @@ import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.npc.dominion.ReindeerOverseer;
 import com.lilithsthrone.game.character.npc.misc.Elemental;
+import com.lilithsthrone.game.character.npc.submission.Shadow;
+import com.lilithsthrone.game.character.npc.submission.Silence;
 import com.lilithsthrone.game.character.persona.SexualOrientation;
 import com.lilithsthrone.game.character.quests.QuestLine;
 import com.lilithsthrone.game.character.race.Race;
@@ -2485,6 +2487,45 @@ public enum StatusEffect {
 			}
 		}
 	},
+
+	BATH(80,
+			"recent bath",
+			"bath",
+			Colour.ATTRIBUTE_HEALTH,
+			Colour.BASE_AQUA,
+			true,
+			null,
+			Util.newArrayListOfValues(
+					"[style.boldGood(Doubles)] [style.colourHealth(health)] and [style.colourMana(aura)] regeneration rate")) {
+		@Override
+		public String getDescription(GameCharacter target) {
+			if(target!=null) {
+				return UtilText.parse(target, "Having recently taken the time to relax in [npc.her] bath, [npc.name] [npc.verb(feel)] refreshed and rejuvenated.");
+			} else {
+				return "";
+			}
+		}
+	},
+
+	BATH_BOOSTED(80,
+			"recent bath",
+			"bath_boosted",
+			Colour.ATTRIBUTE_HEALTH,
+			Colour.BASE_AQUA,
+			Colour.GENERIC_EXCELLENT,
+			true,
+			null,
+			Util.newArrayListOfValues(
+					"[style.boldExcellent(Quadruples)] [style.colourHealth(health)] and [style.colourMana(aura)] regeneration rate")) {
+		@Override
+		public String getDescription(GameCharacter target) {
+			if(target!=null) {
+				return UtilText.parse(target, "Having recently taken the time to relax in [npc.her] spa, [npc.name] [npc.verb(feel)] extremely refreshed and rejuvenated.");
+			} else {
+				return "";
+			}
+		}
+	},
 	
 	OVERWORKED_1(
 			80,
@@ -2733,8 +2774,54 @@ public enum StatusEffect {
 		public boolean isSexEffect() {
 			return true;
 		}
+	},
+	
+	SMOKING(
+			80,
+			"smoking",
+			"smoking",
+			Colour.CLOTHING_ORANGE,
+			Colour.CLOTHING_BRASS,
+			Colour.CLOTHING_WHITE,
+			false,
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, 10f),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, -5f)),
+			null) {
+		@Override
+		public String getDescription(GameCharacter target) {
+			return UtilText.parse(target,
+					"[npc.NameIsFull] currently smoking a cigarette. Every time [npc.she] [npc.verb(exhale)], a faint white cloud forms in front of [npc.her] face, causing [npc.her] immediate surroundings to smell strongly of burning plant matter.");
+		}
+		@Override
+		public boolean isSexEffect() {
+			return true;
+		}
 
-		
+		@Override
+		public String extraRemovalEffects(GameCharacter target) {
+			target.addStatusEffect(RECENTLY_SMOKED, 4 * 60 * 60);
+			return "";
+		}
+	},
+	
+	RECENTLY_SMOKED(
+			80,
+			"recently smoked",
+			"recentlySmoked",
+			Colour.CLOTHING_ORANGE,
+			Colour.CLOTHING_BRASS,
+			Colour.CLOTHING_WHITE,
+			false,
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, 10f),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, -5f)),
+			null) {
+		@Override
+		public String getDescription(GameCharacter target) {
+			return UtilText.parse(target,
+					"[npc.NameHasFull] recently smoked a cigarette, which is obvious to anyone who gets too near to [npc.herHim], as [npc.she] [npc.verb(smell)] strongly of burning plant matter.");
+		}
 	},
 	
 	DRUNK_1(
@@ -6282,7 +6369,7 @@ public enum StatusEffect {
 			"Cattle",
 			"clothingSets/cattle",
 			Colour.BASE_TAN,
-			false,
+			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 5f)),
 			null) {
@@ -6363,7 +6450,7 @@ public enum StatusEffect {
 			"Geisha",
 			"clothingSets/geisha",
 			Colour.BASE_ROSE,
-			false,
+			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 15f)),
 			null) {
@@ -6388,7 +6475,7 @@ public enum StatusEffect {
 			"Ronin",
 			"clothingSets/ronin",
 			Colour.BASE_ROSE,
-			false,
+			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 15f)),
@@ -6421,7 +6508,7 @@ public enum StatusEffect {
 			"Daisho",
 			"clothingSets/daisho",
 			Colour.BASE_ROSE,
-			false,
+			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 15f)),
@@ -6449,7 +6536,7 @@ public enum StatusEffect {
 			"J&oacute;lnir",
 			"clothingSets/jolnir",
 			Colour.BASE_BLACK,
-			false,
+			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 15f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_ICE, 15f),
@@ -6586,7 +6673,6 @@ public enum StatusEffect {
 			}
 			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how angels will behave.");
 		}
-		
 	},
 	
 	COMBAT_BONUS_CAT_MORPH(
@@ -6914,6 +7000,54 @@ public enum StatusEffect {
 	
 
 	// COMBAT EFFECTS:
+
+	SPECIAL_SILENCE_TRANCE(
+			70,
+			"Silence's Trance",
+			"glowingEyes",
+			Colour.GENERIC_ARCANE,
+			true,
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.ACTION_POINTS, 1f),
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, 100f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_SPELLS, 50f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 5f)),
+			null) {
+		@Override
+		public String getDescription(GameCharacter target) {
+			return "Upon witnessing the defeat of her beloved friend, Shadow, Silence has summoned an air elemental and entered into an intense trance, granting her improved combat abilities!";
+		}
+		@Override
+		public boolean isConditionsMet(GameCharacter target) {
+			return Main.game.isInCombat()
+					&& target.equals(Main.game.getNpc(Silence.class))
+					&& !Combat.getEnemies(Main.game.getPlayer()).contains(Main.game.getNpc(Shadow.class));
+		}
+	},
+
+	SPECIAL_SHADOW_BESERK(
+			70,
+			"Shadow's Rage",
+			"glowingEyes",
+			Colour.BASE_CRIMSON,
+			true,
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.ACTION_POINTS, 3f),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, 150f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_MELEE_WEAPON, 50f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 10f)),
+			null) {
+		@Override
+		public String getDescription(GameCharacter target) {
+			return "Upon witnessing the defeat of her beloved friend, Silence, Shadow has entered into a state of frenzied beserker rage, granting her massively improved combat abilities!";
+		}
+		@Override
+		public boolean isConditionsMet(GameCharacter target) {
+			return Main.game.isInCombat()
+					&& target.equals(Main.game.getNpc(Shadow.class))
+					&& Combat.getEnemies(Main.game.getPlayer()).size()==1;
+		}
+	},
 	
 	COMBAT_HIDDEN(
 			70,
@@ -6923,14 +7057,10 @@ public enum StatusEffect {
 			false,
 			null,
 			null) {
-
 		@Override
 		public String getDescription(GameCharacter target) {
 			return "You don't know what perks, status effects, spells, or special attacks your opponent has available. You require the "+Perk.OBSERVANT.getName(target)+" perk to reveal such information.";
 		}
-
-		
-		
 		@Override
 		public boolean isCombatEffect() {
 			return true;
@@ -8273,8 +8403,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -20f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -25f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -15f)),
 			null) {
 		
 		@Override
@@ -9565,10 +9695,10 @@ public enum StatusEffect {
 		public String applyEffect(GameCharacter target, int secondsPassed) {
 			StringBuilder sb = new StringBuilder();
 			
-			for(GameCharacter combatant : Combat.getEnemies(target)) {
+			for(GameCharacter combatant : Combat.getAllies(target)) {
 				Value<String, Integer> damageValue = DamageType.LUST.damageTarget(null, combatant, 15);
 
-				return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damageValue.getValue() + "</b> [style.boldLust(lust damage)]!")+damageValue.getKey();
+				sb.append(UtilText.parse(combatant, "<br/>[npc.Name] [npc.verb(take)] <b>" + damageValue.getValue() + "</b> [style.boldLust(lust damage)]!")+damageValue.getKey());
 			}
 			
 			return sb.toString();
@@ -11366,8 +11496,9 @@ public enum StatusEffect {
 		public boolean isConditionsMet(GameCharacter target) {
 			return Main.game.isInSex()
 					&& Sex.getAllParticipants(true).contains(target)
-					&& target.isBreastFuckableNipplePenetration()
-					&& Main.getProperties().hasValue(PropertyValue.nipplePenContent);
+//					&& target.isBreastFuckableNipplePenetration()
+//					&& Main.getProperties().hasValue(PropertyValue.nipplePenContent)
+					;
 		}
 		
 		@Override
@@ -12838,6 +12969,14 @@ public enum StatusEffect {
 					i++;
 				}
 			}
+			for(LubricationType lt : Sex.getWetAreas(owner).get(penetration).get(null)) {
+				if(i==0) {
+					lubricants.add(Util.capitaliseSentence(lt.getName(null)));
+				} else {
+					lubricants.add(lt.getName(null));
+				}
+				i++;
+			}
 			stringBuilderToAppendTo.append(Util.stringsToStringList(lubricants, false)+".");
 		}
 		stringBuilderToAppendTo.append("</p>");
@@ -12883,6 +13022,14 @@ public enum StatusEffect {
 					}
 					i++;
 				}
+			}
+			for(LubricationType lt : Sex.getWetAreas(owner).get(orificeType).get(null)) {
+				if(i==0) {
+					lubricants.add(Util.capitaliseSentence(lt.getName(null)));
+				} else {
+					lubricants.add(lt.getName(null));
+				}
+				i++;
 			}
 			stringBuilderToAppendTo.append(Util.stringsToStringList(lubricants, false)+".");
 		}

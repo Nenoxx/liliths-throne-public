@@ -69,6 +69,10 @@ public enum Colour {
 	BACKGROUND(false, Util.newColour(0x222222), Util.newColour(0xcccccc), "grey"),
 	BACKGROUND_ALT(false, Util.newColour(0x292929), Util.newColour(0xbbbbbb), "grey"),
 	
+	BACKGROUND_DAY(false, Util.newColour(0x222222), Util.newColour(0xcccccc), "grey"),
+	BACKGROUND_TWILIGHT(false, Util.newColour(0x191919), Util.newColour(0xbbbbbb), "black"),
+	BACKGROUND_NIGHT(false, Util.newColour(0x121212), Util.newColour(0xaaaaaa), "pitch black"),
+	
 	MAP_BACKGROUND_UNEXPLORED(false, Util.newColour(0x121212), Util.newColour(0x121212), "black"),
 	MAP_BACKGROUND_PINK(false, Util.newColour(0xb2a4bb), Util.newColour(0xb2a4bb), "pink"),
 	MAP_BACKGROUND(false, Util.newColour(0xbbbbbb), Util.newColour(0xbbbbbb), "grey"),
@@ -76,7 +80,7 @@ public enum Colour {
 	MAP_BACKGROUND_DANGEROUS(false, Util.newColour(0x303030), Util.newColour(0xaaaaaa), "dark grey"),
 	MAP_BACKGROUND_BLUE(false, BaseColour.BLUE_LIGHT, "light blue", Util.newArrayListOfValues("lightBlue")),
 	
-	GENERIC_SEX(false, BaseColour.PINK_LIGHT, "light pink", Util.newArrayListOfValues("sex")),
+	GENERIC_SEX(false, BaseColour.PINK_LIGHT, "light pink", Util.newArrayListOfValues("sex", "sexSub", "subSex")),
 	GENERIC_SEX_AS_DOM(false,Util.newColour(0xFF75BA), Util.newColour(0xD82C8B), "pink", Util.newArrayListOfValues("sexDom", "domSex")),
 	DOMINANT(false, BaseColour.CRIMSON, "crimson", Util.newArrayListOfValues("dom", "dominant")),
 	SUBMISSIVE(false, BaseColour.PINK_LIGHT, "light pink", Util.newArrayListOfValues("sub", "submissive")),
@@ -135,6 +139,7 @@ public enum Colour {
 	RACE_REINDEER_MORPH(false, BaseColour.BROWN_DARK, "dark brown", Util.newArrayListOfValues("reindeerMorph", "reindeer")),
 	RACE_WOLF_MORPH(false, BaseColour.BLACK, "black", Util.newArrayListOfValues("wolfMorph", "wolf")),
 	RACE_FOX_MORPH(false, BaseColour.GINGER, "ginger", Util.newArrayListOfValues("foxMorph", "fox")),
+	RACE_FOX_MORPH_ARCTIC(false, BaseColour.WHITE, "white", Util.newArrayListOfValues("arcticFoxMorph", "arcticFox")),
 	RACE_HARPY(false, BaseColour.PINK_LIGHT, "light pink", Util.newArrayListOfValues("harpy")),
 	RACE_SLIME(false, BaseColour.GREEN_LIGHT, "light green", Util.newArrayListOfValues("slime")),
 	RACE_SQUIRREL_MORPH(false, BaseColour.GINGER, "ginger", Util.newArrayListOfValues("squirrelMorph", "squirrel")),
@@ -691,7 +696,10 @@ public enum Colour {
 	EYE_WHITE(false, BaseColour.WHITE, "white"),
 	
 	EYE_BROWN(false, BaseColour.BROWN, "brown"),
-	EYE_BLUE(false, BaseColour.BLUE_LIGHT, "blue"),
+	EYE_BLUE_DARK(false, BaseColour.BLUE_DARK, "dark blue"),
+	EYE_BLUE(false, BaseColour.BLUE, "blue"),
+	EYE_BLUE_LIGHT(false, BaseColour.BLUE_LIGHT, "light blue"),
+//	EYE_BLUE_ELECTRIC(false, Util.newColour(0x7DF9FF), Util.newColour(0x7DF9FF), "electric blue"),
 	EYE_HAZEL(false, BaseColour.TAN, "hazel"),
 	EYE_AQUA(false, BaseColour.AQUA, "aqua"),
 	EYE_GREEN(false, BaseColour.GREEN, "green"),
@@ -711,7 +719,10 @@ public enum Colour {
 	EYE_RED(false, BaseColour.RED, "red"),
 	EYE_PINK(false, BaseColour.PINK, "pink"),
 	EYE_ORANGE(false, BaseColour.ORANGE, "orange"),
-	EYE_BLACK(false, BaseColour.BLACK, "black");
+	EYE_BLACK(false, BaseColour.BLACK, "black"),
+	EYE_PITCH_BLACK(false, BaseColour.BLACK, "pitch black") {
+		public boolean isJetBlack() { return true; }
+	};
 	
 
 	public static final Colour[] ACTION_POINT_COLOURS = new Colour[] {Colour.GENERIC_EXCELLENT, Colour.GENERIC_GOOD, Colour.GENERIC_MINOR_GOOD, Colour.GENERIC_MINOR_BAD, Colour.GENERIC_BAD, Colour.GENERIC_TERRIBLE};
@@ -999,7 +1010,9 @@ public enum Colour {
 			Colour.EYE_BROWN,
 			Colour.EYE_AMBER,
 			Colour.EYE_HAZEL,
+			Colour.EYE_BLUE_DARK,
 			Colour.EYE_BLUE,
+			Colour.EYE_BLUE_LIGHT,
 			Colour.EYE_AQUA,
 			Colour.EYE_GREEN,
 			Colour.EYE_GREY);
@@ -1018,6 +1031,7 @@ public enum Colour {
 			Colour.EYE_PURPLE,
 			Colour.EYE_VIOLET,
 			Colour.EYE_BLACK,
+			Colour.EYE_PITCH_BLACK,
 			Colour.COVERING_RAINBOW,
 			Colour.COVERING_RAINBOW_PASTEL);
 
@@ -1025,7 +1039,9 @@ public enum Colour {
 			Colour.EYE_BROWN,
 			Colour.EYE_AMBER,
 			Colour.EYE_HAZEL,
+			Colour.EYE_BLUE_DARK,
 			Colour.EYE_BLUE,
+			Colour.EYE_BLUE_LIGHT,
 			Colour.EYE_AQUA,
 			Colour.EYE_GREEN,
 			Colour.EYE_GREY,
@@ -1039,7 +1055,8 @@ public enum Colour {
 			Colour.EYE_LILAC,
 			Colour.EYE_PURPLE,
 			Colour.EYE_VIOLET,
-			Colour.EYE_BLACK);
+			Colour.EYE_BLACK,
+			Colour.EYE_PITCH_BLACK);
 	
 	public static List<Colour> dyeDemonIrisColours = Util.newArrayListOfValues(
 			Colour.EYE_SILVER,
@@ -1052,7 +1069,9 @@ public enum Colour {
 			Colour.EYE_BROWN,
 			Colour.EYE_AMBER,
 			Colour.EYE_YELLOW,
+			Colour.EYE_BLUE_DARK,
 			Colour.EYE_BLUE,
+			Colour.EYE_BLUE_LIGHT,
 			Colour.EYE_AQUA,
 			Colour.EYE_GREEN,
 			Colour.EYE_GREY);
@@ -1069,6 +1088,7 @@ public enum Colour {
 			Colour.EYE_PURPLE,
 			Colour.EYE_VIOLET,
 			Colour.EYE_BLACK,
+			Colour.EYE_PITCH_BLACK,
 			Colour.COVERING_RAINBOW,
 			Colour.COVERING_RAINBOW_PASTEL);
 	
@@ -1080,7 +1100,9 @@ public enum Colour {
 			Colour.EYE_WHITE,
 			Colour.EYE_SILVER,
 			Colour.EYE_BROWN,
+			Colour.EYE_BLUE_DARK,
 			Colour.EYE_BLUE,
+			Colour.EYE_BLUE_LIGHT,
 			Colour.EYE_AQUA,
 			Colour.EYE_GREEN,
 			Colour.EYE_GREY,
@@ -1096,6 +1118,7 @@ public enum Colour {
 			Colour.EYE_LILAC,
 			Colour.EYE_PURPLE,
 			Colour.EYE_VIOLET,
+			Colour.EYE_PITCH_BLACK,
 			Colour.COVERING_RAINBOW,
 			Colour.COVERING_RAINBOW_PASTEL);
 	
@@ -1106,7 +1129,9 @@ public enum Colour {
 			Colour.EYE_BLACK,
 			Colour.EYE_SILVER,
 			Colour.EYE_BROWN,
+			Colour.EYE_BLUE_DARK,
 			Colour.EYE_BLUE,
+			Colour.EYE_BLUE_LIGHT,
 			Colour.EYE_AQUA,
 			Colour.EYE_GREEN,
 			Colour.EYE_GREY,
@@ -1122,6 +1147,7 @@ public enum Colour {
 			Colour.EYE_LILAC,
 			Colour.EYE_PURPLE,
 			Colour.EYE_VIOLET,
+			Colour.EYE_PITCH_BLACK,
 			Colour.COVERING_RAINBOW,
 			Colour.COVERING_RAINBOW_PASTEL);
 	

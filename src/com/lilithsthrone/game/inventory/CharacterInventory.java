@@ -3,7 +3,6 @@ package com.lilithsthrone.game.inventory;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +57,7 @@ import com.lilithsthrone.world.World;
  * Only the very bravest dare venture past line 901.
  * 
  * @since 0.1.0
- * @version 0.3.4
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public class CharacterInventory implements XMLSaving {
@@ -87,7 +86,6 @@ public class CharacterInventory implements XMLSaving {
 	// ClothingSets being worn:
 	private final Map<ClothingSet, Integer> clothingSetCount;
 
-	@SuppressWarnings("unused")
 	private int maxInventorySpace;
 
 	public CharacterInventory(int money) {
@@ -104,7 +102,7 @@ public class CharacterInventory implements XMLSaving {
 		
 		dirtySlots = new HashSet<>();
 		
-		essenceMap = new EnumMap<>(TFEssence.class);
+		essenceMap = new HashMap<>();
 		for(TFEssence essence : TFEssence.values()) {
 			essenceMap.put(essence, 0);
 		}
@@ -113,12 +111,42 @@ public class CharacterInventory implements XMLSaving {
 		offhandWeapon = new AbstractWeapon[Arm.MAXIMUM_ROWS];
 		
 		clothingCurrentlyEquipped = new ArrayList<>();
-		clothingSetCount = new EnumMap<>(ClothingSet.class);
+		clothingSetCount = new HashMap<>();
 		for(ClothingSet clothingSet : ClothingSet.values()) {
 			clothingSetCount.put(clothingSet, 0);
 		}
 		
 		this.maxInventorySpace = maxInventorySpace;
+	}
+	
+	public CharacterInventory(CharacterInventory inventoryToCopy) {
+		this.money = inventoryToCopy.money;
+
+		weaponSubInventory = new AbstractInventory<>(inventoryToCopy.weaponSubInventory);
+		clothingSubInventory = new AbstractInventory<>(inventoryToCopy.clothingSubInventory);
+		itemSubInventory = new AbstractInventory<>(inventoryToCopy.itemSubInventory);
+		
+		dirtySlots = new HashSet<>(inventoryToCopy.getDirtySlots());
+		
+		essenceMap = new HashMap<>(inventoryToCopy.essenceMap);
+
+		mainWeapon = new AbstractWeapon[Arm.MAXIMUM_ROWS];
+		for(int i=0; i<mainWeapon.length; i++) {
+			mainWeapon[i] = inventoryToCopy.mainWeapon[i];
+		}
+		offhandWeapon = new AbstractWeapon[Arm.MAXIMUM_ROWS];
+		for(int i=0; i<offhandWeapon.length; i++) {
+			offhandWeapon[i] = inventoryToCopy.offhandWeapon[i];
+		}
+		
+		clothingCurrentlyEquipped = new ArrayList<>(inventoryToCopy.clothingCurrentlyEquipped);
+		clothingSetCount = new HashMap<>(inventoryToCopy.clothingSetCount);
+		
+		this.maxInventorySpace = inventoryToCopy.maxInventorySpace;
+		
+		this.blockingClothing = inventoryToCopy.blockingClothing;
+
+		this.extraBlockedParts = inventoryToCopy.extraBlockedParts;
 	}
 	
 	@Override
@@ -297,7 +325,10 @@ public class CharacterInventory implements XMLSaving {
 				
 				int count = Integer.parseInt(e.getAttribute("count"));
 				String id = e.getAttribute("id");
-				if(id.equals(ItemType.getItemToIdMap().get(ItemType.CONDOM_USED))) {
+				if(id.equals("GIFT_ROSE")) { // Changed the rose to a clothing item in v0.3.5.5
+					inventory.addClothing(AbstractClothingType.generateClothing("innoxia_hair_rose", Colour.CLOTHING_RED_DARK, Colour.CLOTHING_GREEN_DARK, null, false), count);
+					
+				} else if(id.equals(ItemType.getItemToIdMap().get(ItemType.CONDOM_USED))) {
 					itemMapToAdd.put(AbstractFilledCondom.loadFromXML(e, doc), count);
 					
 				} else if(id.equals(ItemType.getItemToIdMap().get(ItemType.MOO_MILKER_FULL))) {
@@ -1057,7 +1088,7 @@ public class CharacterInventory implements XMLSaving {
 	public String calculateClothingAndWeaponsPostTransformation(GameCharacter character) {
 		tempSB = new StringBuilder();
 		List<AbstractClothing> clothingToRemove = new ArrayList<>();
-		for (AbstractClothing c : clothingCurrentlyEquipped){
+		for (AbstractClothing c : new ArrayList<>(clothingCurrentlyEquipped)){
 			// Race:
 			BodyPartClothingBlock block = c.getSlotEquippedTo().getBodyPartClothingBlock(character);
 			if (block != null && Collections.disjoint(block.getRequiredTags(), c.getItemTags())) {
@@ -1068,7 +1099,6 @@ public class CharacterInventory implements XMLSaving {
 				transformationIncompatible(character, c, clothingToRemove, c.getCannotBeEquippedText(character, c.getSlotEquippedTo()));
 			}
 		}
-		clothingCurrentlyEquipped.removeAll(clothingToRemove);
 		
 		for(int i=0; i<character.getMainWeaponArray().length; i++) {
 			if(character.getArmRows()-1<i) {
@@ -1096,14 +1126,17 @@ public class CharacterInventory implements XMLSaving {
 		}
 		tempSB.append("<br/><span style='color:" + Colour.GENERIC_BAD.toWebHexString() + ";'>"+UtilText.parse(character, description)+"</span>");
 		
-		if (isInventoryFull() && !hasClothing(c)) {
-			Main.game.getWorlds().get(character.getWorldLocation()).getCell(character.getLocation()).getInventory().addClothing(c);
-			tempSB.append("<br/>" + character.droppedItemText(c));
-			
-		} else {
-			character.addClothing(c, false);
-			tempSB.append("<br/>" + character.addedItemToInventoryText(c));
-		}
+//		if (isInventoryFull() && !hasClothing(c)) {
+//			Main.game.getWorlds().get(character.getWorldLocation()).getCell(character.getLocation()).getInventory().addClothing(c);
+//			tempSB.append("<br/>" + character.droppedItemText(c));
+//			
+//		} else {
+//			character.addClothing(c, false);
+//			tempSB.append("<br/>" + character.addedItemToInventoryText(c));
+//		}
+		tempSB.append(character.unequipClothingIntoInventory(c, true, character));
+		
+		
 		clothingRemovalList.add(c);	
 	}
 	
@@ -1124,6 +1157,10 @@ public class CharacterInventory implements XMLSaving {
 		return equipTextSB.toString();
 	}
 
+	public void resetEquipDescription() {
+		equipTextSB.setLength(0);
+	}
+	
 	private Set<AbstractClothing> incompatibleUnequippableClothing = new HashSet<>();
 	private Set<AbstractClothing> incompatibleRemovableClothing = new HashSet<>();
 	// Map of clothing that needs to be removed. If value is

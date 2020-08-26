@@ -18,6 +18,7 @@ import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.npc.dominion.Brax;
 import com.lilithsthrone.game.character.npc.dominion.Lilaya;
 import com.lilithsthrone.game.character.npc.misc.GenericSexualPartner;
+import com.lilithsthrone.game.character.persona.PersonalityTrait;
 import com.lilithsthrone.game.character.quests.Quest;
 import com.lilithsthrone.game.character.quests.QuestLine;
 import com.lilithsthrone.game.character.race.RaceStage;
@@ -91,6 +92,8 @@ public class DebugDialogue {
 			} else if(index == 3) {
 				return "Item view";
 				
+			} else if(index == 4) {
+				return "Personality";
 			}
 			return null;
 		}
@@ -101,7 +104,7 @@ public class DebugDialogue {
 				return new Response("Back", "", DEBUG_MENU){
 					@Override
 					public DialogueNode getNextDialogue() {
-						return Main.game.getDefaultDialogueNoEncounter();
+						return Main.game.getDefaultDialogue(false);
 					}
 				};
 				
@@ -413,6 +416,22 @@ public class DebugDialogue {
 							}
 						}
 					};
+				} else if (index == 12) {
+					return new Response("[style.boldMinorBad(Day -)]", "Reduce current day by 1.", DEBUG_MENU){
+						@Override
+						public void effects() {
+							Main.game.incrementStartingDateDays(-1);
+						}
+					};
+					
+				} else if (index == 13) {
+						return new Response("[style.boldMinorGood(Day +)]", "Increase current day by 1.", DEBUG_MENU){
+							@Override
+							public void effects() {
+								Main.game.incrementStartingDateDays(1);
+							}
+						};
+						
 				}
 				
 			} else if(responseTab == 3) {
@@ -477,6 +496,32 @@ public class DebugDialogue {
 							public void effects() {
 								viewItemVariablesReset();
 								itemViewSlot = is;
+							}
+						};
+					}
+				}
+			} else if(responseTab==4) {
+				List<PersonalityTrait> pt = Arrays.asList(PersonalityTrait.values());
+				for(int i=1; i<=pt.size();i++) {
+					if(i==index) {
+						PersonalityTrait perTr = pt.get(index-1);
+						boolean hasTrait = Main.game.getPlayer().hasPersonalityTrait(perTr);
+						return new Response(
+								hasTrait
+									?"<b style='color:"+perTr.getColour().toWebHexString()+";'>"+Util.capitaliseSentence(perTr.getName())+"</b>"
+									:Util.capitaliseSentence(perTr.getName()),
+									(hasTrait
+										?"[style.boldGood(Owned!)] "
+										:"[style.colourMinorBad(Not owned!)] ")
+									+perTr.getDescription(Main.game.getPlayer(), true, true),
+								DEBUG_MENU) {
+							@Override
+							public void effects() {
+								if(hasTrait) {
+									Main.game.getPlayer().removePersonalityTrait(perTr);
+								} else {
+									Main.game.getPlayer().addPersonalityTrait(perTr);
+								}
 							}
 						};
 					}
@@ -616,7 +661,8 @@ public class DebugDialogue {
 								+ "<div class='inventory-icon-content'>"+weaponType.getSVGImage(
 										weaponType.getAvailableDamageTypes().get(0),
 										weaponType.getAvailablePrimaryColours().isEmpty()?null:weaponType.getAvailablePrimaryColours().get(0),
-										weaponType.getAvailableSecondaryColours().isEmpty()?null:weaponType.getAvailableSecondaryColours().get(0))
+										weaponType.getAvailableSecondaryColours().isEmpty()?null:weaponType.getAvailableSecondaryColours().get(0),
+										weaponType.getAvailableTertiaryColours().isEmpty()?null:weaponType.getAvailableTertiaryColours().get(0))
 								+"</div>"
 								+ "<div class='overlay' id='" + weaponType.getId() + "_SPAWN'></div>"
 							+ "</div>");
@@ -657,7 +703,8 @@ public class DebugDialogue {
 												+ "<div class='inventory-icon-content'>"+weaponType.getSVGImage(
 														weaponType.getAvailableDamageTypes().get(0),
 														weaponType.getAvailablePrimaryColours().isEmpty()?null:weaponType.getAvailablePrimaryColours().get(0),
-														weaponType.getAvailableSecondaryColours().isEmpty()?null:weaponType.getAvailableSecondaryColours().get(0))
+														weaponType.getAvailableSecondaryColours().isEmpty()?null:weaponType.getAvailableSecondaryColours().get(0),
+														weaponType.getAvailableTertiaryColours().isEmpty()?null:weaponType.getAvailableTertiaryColours().get(0))
 												+"</div>"
 												+ "<div class='overlay' id='" + weaponType.getId() + "_SPAWN'></div>"
 											+ "</div>");
@@ -788,7 +835,8 @@ public class DebugDialogue {
 												+ "<div class='inventory-icon-content'>"+weaponType.getSVGImage(
 														weaponType.getAvailableDamageTypes().get(0),
 														weaponType.getAvailablePrimaryColours().isEmpty()?null:Util.randomItemFrom(weaponType.getAvailablePrimaryColours()),
-														weaponType.getAvailableSecondaryColours().isEmpty()?null:Util.randomItemFrom(weaponType.getAvailableSecondaryColours()))
+														weaponType.getAvailableSecondaryColours().isEmpty()?null:Util.randomItemFrom(weaponType.getAvailableSecondaryColours()),
+														weaponType.getAvailableTertiaryColours().isEmpty()?null:weaponType.getAvailableTertiaryColours().get(0))
 												+"</div>"
 												+ "<div class='overlay' id='" + weaponType.getId() + "_SPAWN'></div>"
 											+ "</div>"
@@ -918,26 +966,39 @@ public class DebugDialogue {
 		
 		@Override
 		public Response getResponse(int responseTab, int index) {
-			
 			if (index != 0 && index < Subspecies.values().length) {
-				String name = Subspecies.values()[index - 1].getName(Main.game.getPlayer());
+				String name = Subspecies.values()[index - 1].getName(null);
 				return new Response(
 						Util.capitaliseSentence(name),
 						"Set your body as that of "+UtilText.generateSingularDeterminer(name)+" "+name+".",
 						BODY_PART_RACE_RESET){
 					@Override
 					public void effects() {
-						CharacterUtils.reassignBody(Main.game.getPlayer(), Main.game.getPlayer().getBody(), Main.game.getPlayer().getGender(), Subspecies.values()[index - 1],
-								responseTab==0
-									?RaceStage.PARTIAL
-									:(responseTab==1
-										?RaceStage.PARTIAL_FULL
-										:(responseTab==2
-											?RaceStage.LESSER
-											:RaceStage.GREATER)));
+						if(Subspecies.values()[index - 1]==Subspecies.HALF_DEMON) {
+							Main.game.getPlayer().setSubspeciesOverride(null);
+							Main.game.getPlayer().setBody(
+									CharacterUtils.generateHalfDemonBody(Main.game.getPlayer(), Main.game.getPlayer().getGender(), Subspecies.HUMAN, false),
+									false);
+							System.out.println(Main.game.getPlayer().getSubspeciesOverride());
+							
+						} else {
+							CharacterUtils.reassignBody(
+									Main.game.getPlayer(),
+									Main.game.getPlayer().getBody(),
+									Main.game.getPlayer().getGender(),
+									Subspecies.values()[index - 1],
+									responseTab==0
+										?RaceStage.PARTIAL
+										:(responseTab==1
+											?RaceStage.PARTIAL_FULL
+											:(responseTab==2
+												?RaceStage.LESSER
+												:RaceStage.GREATER)),
+									false);
+						}
 						Main.game.getTextEndStringBuilder().append(
 								"<p>"
-										+ "[style.boldTfGeneric(Transformed:)] You are now "+UtilText.generateSingularDeterminer(name)+" "+name+"!"
+									+ "[style.boldTfGeneric(Transformed:)] You are now "+UtilText.generateSingularDeterminer(name)+" "+name+"!"
 								+ "</p>");
 					}
 				};
@@ -1532,9 +1593,9 @@ public class DebugDialogue {
 		public Response getResponse(int responseTab, int index) {
 			if(index==1) {
 				if(Sex.isDom(Main.game.getPlayer())) {
-					return new Response("Continue", "Now that you've put this bitch in [npc.her] place, you can continue with what you were doing...", Main.game.getDefaultDialogueNoEncounter());
+					return new Response("Continue", "Now that you've put this bitch in [npc.her] place, you can continue with what you were doing...", Main.game.getDefaultDialogue(false));
 				} else {
-					return new Response("Continue", "Now that you've been put in your place like the bitch you are, you can continue with what you were doing...", Main.game.getDefaultDialogueNoEncounter());
+					return new Response("Continue", "Now that you've been put in your place like the bitch you are, you can continue with what you were doing...", Main.game.getDefaultDialogue(false));
 				}
 			}
 			return null;
@@ -1587,7 +1648,7 @@ public class DebugDialogue {
 						+ "</p>");
 				
 			} else if(index==0) {
-				return new Response("Nevermind", UtilText.parse(centaur, "Decide not to do anything with this [npc.race], and instead just continue with what you were doing..."), Main.game.getDefaultDialogueNoEncounter()) {
+				return new Response("Nevermind", UtilText.parse(centaur, "Decide not to do anything with this [npc.race], and instead just continue with what you were doing..."), Main.game.getDefaultDialogue(false)) {
 					@Override
 					public void effects() {
 						Main.game.banishNPC(centaur);
@@ -1615,14 +1676,14 @@ public class DebugDialogue {
 			if(index==1) {
 				NPC centaur = Main.game.getActiveNPC();
 				if(Sex.isDom(Main.game.getPlayer())) {
-					return new Response("Continue", UtilText.parse(centaur, "Now that you've put this [npc.race] in [npc.her] place, you can continue with what you were doing..."), Main.game.getDefaultDialogueNoEncounter()) {
+					return new Response("Continue", UtilText.parse(centaur, "Now that you've put this [npc.race] in [npc.her] place, you can continue with what you were doing..."), Main.game.getDefaultDialogue(false)) {
 						@Override
 						public void effects() {
 							Main.game.banishNPC(centaur);
 						}
 					};
 				} else {
-					return new Response("Continue", UtilText.parse(centaur, "Now that you've been put in your place by this [npc.race], you can continue with what you were doing..."), Main.game.getDefaultDialogueNoEncounter()) {
+					return new Response("Continue", UtilText.parse(centaur, "Now that you've been put in your place by this [npc.race], you can continue with what you were doing..."), Main.game.getDefaultDialogue(false)) {
 						@Override
 						public void effects() {
 							Main.game.banishNPC(centaur);

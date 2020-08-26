@@ -25,7 +25,7 @@ import com.lilithsthrone.game.dialogue.places.dominion.cityHall.CityHallDemograp
 import com.lilithsthrone.game.dialogue.places.dominion.cityHall.CityHallProperty;
 import com.lilithsthrone.game.dialogue.places.dominion.enforcerHQ.BraxOffice;
 import com.lilithsthrone.game.dialogue.places.dominion.enforcerHQ.EnforcerHQDialogue;
-import com.lilithsthrone.game.dialogue.places.dominion.harpyNests.HarpyNestAlexa;
+import com.lilithsthrone.game.dialogue.places.dominion.harpyNests.HarpyNestHelena;
 import com.lilithsthrone.game.dialogue.places.dominion.harpyNests.HarpyNestBimbo;
 import com.lilithsthrone.game.dialogue.places.dominion.harpyNests.HarpyNestDominant;
 import com.lilithsthrone.game.dialogue.places.dominion.harpyNests.HarpyNestNympho;
@@ -53,12 +53,17 @@ import com.lilithsthrone.game.dialogue.places.dominion.zaranixHome.ZaranixHomeGr
 import com.lilithsthrone.game.dialogue.places.dominion.zaranixHome.ZaranixHomeGroundFloorRepeat;
 import com.lilithsthrone.game.dialogue.places.global.GlobalFoloiFields;
 import com.lilithsthrone.game.dialogue.places.submission.BatCaverns;
-import com.lilithsthrone.game.dialogue.places.submission.GamblingDenDialogue;
 import com.lilithsthrone.game.dialogue.places.submission.LyssiethPalaceDialogue;
 import com.lilithsthrone.game.dialogue.places.submission.SlimeQueensLair;
 import com.lilithsthrone.game.dialogue.places.submission.SubmissionGenericPlaces;
+import com.lilithsthrone.game.dialogue.places.submission.gamblingDen.GamblingDenDialogue;
+import com.lilithsthrone.game.dialogue.places.submission.gamblingDen.PregnancyRoulette;
+import com.lilithsthrone.game.dialogue.places.submission.gamblingDen.RoxysShop;
 import com.lilithsthrone.game.dialogue.places.submission.impFortress.ImpCitadelDialogue;
 import com.lilithsthrone.game.dialogue.places.submission.impFortress.ImpFortressDialogue;
+import com.lilithsthrone.game.dialogue.places.submission.ratWarrens.RatWarrensCaptiveDialogue;
+import com.lilithsthrone.game.dialogue.places.submission.ratWarrens.RatWarrensDialogue;
+import com.lilithsthrone.game.dialogue.places.submission.ratWarrens.VengarCaptiveDialogue;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.CharacterInventory;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothingType;
@@ -77,7 +82,7 @@ import com.lilithsthrone.world.WorldType;
 
 /**
  * @since 0.1.0
- * @version 0.3.5
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public class PlaceType {
@@ -1175,14 +1180,14 @@ public class PlaceType {
 		}
 	}.initWeatherImmune();
 	
-	public static final AbstractPlaceType HARPY_NESTS_ALEXAS_NEST = new AbstractPlaceType(
-			"Alexa's nest",
-			"The stunningly beautiful harpy matriarch, Alexa, rules over the largest of all the harpy nests.",
-			"dominion/harpyNests/nestAlexa",
+	public static final AbstractPlaceType HARPY_NESTS_HELENAS_NEST = new AbstractPlaceType(
+			"Helena's nest",
+			"The stunningly beautiful harpy matriarch, Helena, rules over the largest of all the harpy nests.",
+			"dominion/harpyNests/nestHelena",
 			BaseColour.GOLD,
-			HarpyNestAlexa.ALEXAS_NEST_EXTERIOR,
+			HarpyNestHelena.HELENAS_NEST_EXTERIOR,
 			null,
-			"in Alexa's nest"){
+			"in Helena's nest"){
 		@Override
 		public Population getPopulation() {
 			return HARPY_NESTS_WALKWAYS.getPopulation();
@@ -1513,7 +1518,8 @@ public class PlaceType {
 				@Override
 				public ArrayList<PlaceUpgrade> getAvailablePlaceUpgrades(Set<PlaceUpgrade> upgrades) {
 					return Util.newArrayListOfValues(
-							PlaceUpgrade.LILAYA_PLAYER_ROOM_BED);//TODO add BATH
+							PlaceUpgrade.LILAYA_PLAYER_ROOM_BED,
+							PlaceUpgrade.LILAYA_PLAYER_ROOM_BATH);
 				}
 				@Override
 				public boolean isAbleToBeUpgraded() {
@@ -1936,7 +1942,11 @@ public class PlaceType {
 			"in the Shopping Arcade") {
 		@Override
 		public Population getPopulation() {
-			return new Population(PopulationType.CROWDS, PopulationDensity.DENSE, Subspecies.getWorldSpecies().get(WorldType.DOMINION));
+			if(Main.game.isExtendedWorkTime()) {
+				return new Population(PopulationType.CROWDS, PopulationDensity.DENSE, Subspecies.getWorldSpecies().get(WorldType.DOMINION));
+			} else {
+				return new Population(PopulationType.PEOPLE, PopulationDensity.COUPLE, Subspecies.getWorldSpecies().get(WorldType.DOMINION));
+			}
 		}
 	}.initWeatherImmune();
 
@@ -1950,7 +1960,11 @@ public class PlaceType {
 			"in the Shopping Arcade") {
 		@Override
 		public Population getPopulation() {
-			return new Population(PopulationType.SHOPPERS, PopulationDensity.NUMEROUS, Subspecies.getWorldSpecies().get(WorldType.DOMINION));
+			if(Main.game.isExtendedWorkTime()) {
+				return new Population(PopulationType.SHOPPERS, PopulationDensity.NUMEROUS, Subspecies.getWorldSpecies().get(WorldType.DOMINION));
+			} else {
+				return null;
+			}
 		}
 	}.initWeatherImmune();
 	
@@ -2325,7 +2339,21 @@ public class PlaceType {
 			return new Population(PopulationType.CROWD, PopulationDensity.SPARSE, Subspecies.getWorldSpecies().get(WorldType.DOMINION));
 		}
 	}.initWeatherImmune(Weather.MAGIC_STORM);
-
+	
+	public static final AbstractPlaceType SLAVER_ALLEY_BOUNTY_HUNTERS = new AbstractPlaceType(
+			"Bounty Hunter Lodge",
+			"A tavern in which bounty hunters can be contracted to track down runaway slaves.",
+			"dominion/slaverAlley/bountyHunters",
+			BaseColour.RED_DARK,
+			SlaverAlleyDialogue.BOUNTY_HUNTERS,
+			null,
+			"in Slaver's Alley"){
+		@Override
+		public Population getPopulation() {
+			return new Population(PopulationType.PEOPLE, PopulationDensity.NUMEROUS, Subspecies.getWorldSpecies().get(WorldType.DOMINION));
+		}
+	}.initWeatherImmune(Weather.MAGIC_STORM);
+	
 	public static final AbstractPlaceType SLAVER_ALLEY_SLAVERY_ADMINISTRATION = new AbstractPlaceType(
 			"Slavery Administration",
 			"The main administrative hub for all matters related to the ownership of slaves.",
@@ -2353,8 +2381,8 @@ public class PlaceType {
 			if(Main.game.getPlayer().isQuestProgressLessThan(QuestLine.MAIN, Quest.MAIN_1_F_SCARLETTS_FATE)) { // Scarlett owns the shop:
 				return ScarlettsShop.SCARLETTS_SHOP_EXTERIOR;
 				
-			} else { // Alexa owns the shop:
-				return ScarlettsShop.ALEXAS_SHOP_EXTERIOR;
+			} else { // Helena owns the shop:
+				return ScarlettsShop.HELENAS_SHOP_EXTERIOR;
 			}
 		}
 		@Override
@@ -2362,7 +2390,7 @@ public class PlaceType {
 			if(Main.game.getPlayer().isQuestProgressLessThan(QuestLine.MAIN, Quest.MAIN_1_F_SCARLETTS_FATE)) {
 				return tooltipDescription;
 			} else {
-				return "Alexa has taken over the shop which Scarlett one had the responsibility of running, and has renamed it to 'Alexa's pet shop'.";
+				return "Helena has taken over the shop which Scarlett one had the responsibility of running, and has renamed it to 'Helena's pet shop'.";
 			}
 		}
 	}.initWeatherImmune(Weather.MAGIC_STORM);
@@ -2593,8 +2621,8 @@ public class PlaceType {
 			).initWeatherImmune();
 	
 	public static final AbstractPlaceType SUBMISSION_RAT_WARREN = new AbstractPlaceType(
-			"Rat Warren",
-			"The entrance to Vengar's rat warrens can be found in this area, adn takes the form of a stone archway, sealed off by a pair of heavy oaken doors.",
+			"Rat Warrens",
+			"The entrance to the rat warrens can be found in this area, and takes the form of a stone archway, sealed off by a pair of heavy oaken doors.",
 			"submission/ratWarren",
 			BaseColour.BROWN_DARK,
 			SubmissionGenericPlaces.RAT_WARREN,
@@ -3364,13 +3392,23 @@ public class PlaceType {
 			return new Population(PopulationType.CROWD, PopulationDensity.SPARSE, Subspecies.getWorldSpecies().get(WorldType.SUBMISSION));
 		}
 	}.initWeatherImmune();
+
+	public static final AbstractPlaceType GAMBLING_DEN_OFFICE = new AbstractPlaceType(
+			"Axel's Office",
+			"Axel's office is situated next to the main entrance, and is locked when not in use.",
+			"submission/gamblingDen/office",
+			BaseColour.ORANGE,
+			GamblingDenDialogue.OFFICE,
+			null,
+			"in the Gambling Den") {
+	}.initWeatherImmune();
 	
 	public static final AbstractPlaceType GAMBLING_DEN_TRADER = new AbstractPlaceType(
 			"Roxy's Box",
 			"'Roxy's Box' is a rather over-priced pawn shop, and offers goods that can be found at much reduced prices up in Dominion.",
 			"submission/gamblingDen/trader",
 			BaseColour.TEAL,
-			GamblingDenDialogue.TRADER,
+			RoxysShop.TRADER,
 			null,
 			"in the Gambling Den"
 			).initWeatherImmune();
@@ -3394,7 +3432,7 @@ public class PlaceType {
 			"The game 'pregnancy roulette' is run by the horse-girl, Epona, from behind a long wooden counter that's been set into the wall.",
 			"submission/gamblingDen/referee",
 			BaseColour.PINK,
-			GamblingDenDialogue.PREGNANCY_ROULETTE,
+			PregnancyRoulette.PREGNANCY_ROULETTE,
 			null,
 			"in the Gambling Den") {
 		@Override
@@ -3423,6 +3461,286 @@ public class PlaceType {
 			"in the Gambling Den"
 			).initWeatherImmune();
 	
+	
+	
+	
+	// Rat warrens:
+
+	public static final AbstractPlaceType RAT_WARRENS_CORRIDOR_LEFT = new AbstractPlaceType(
+			"Twisting Passageways",
+			"The twisting passageways of the Rat Warrens vary greatly in both width and quality of construction.",
+			null,
+			BaseColour.BLACK,
+			RatWarrensDialogue.CORRIDOR,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedLeft);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_CHECKPOINT_LEFT = new AbstractPlaceType(
+			"Twisting Passageways",
+			"The twisting passageways of the Rat Warrens vary greatly in both width and quality of construction.",
+			null,
+			BaseColour.BLACK,
+			RatWarrensDialogue.CORRIDOR,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile)
+					&& (!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedLeft) || !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedCentre));
+		}
+	}.initWeatherImmune();
+	
+	public static final AbstractPlaceType RAT_WARRENS_CORRIDOR = new AbstractPlaceType(
+			"Twisting Passageways",
+			"The twisting passageways of the Rat Warrens vary greatly in both width and quality of construction.",
+			null,
+			BaseColour.BLACK,
+			RatWarrensDialogue.CORRIDOR,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedCentre);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_CORRIDOR_RIGHT = new AbstractPlaceType(
+			"Twisting Passageways",
+			"The twisting passageways of the Rat Warrens vary greatly in both width and quality of construction.",
+			null,
+			BaseColour.BLACK,
+			RatWarrensDialogue.CORRIDOR,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public DialogueNode getDialogue(boolean withRandomEncounter, boolean forceEncounter) {
+			if(Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.playerCaptive)) {
+				return VengarCaptiveDialogue.CORRIDOR;
+			}
+			return super.getDialogue(withRandomEncounter, forceEncounter);
+		}
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedRight);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_CHECKPOINT_RIGHT = new AbstractPlaceType(
+			"Twisting Passageways",
+			"The twisting passageways of the Rat Warrens vary greatly in both width and quality of construction.",
+			null,
+			BaseColour.BLACK,
+			RatWarrensDialogue.CORRIDOR,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile)
+					&& (!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedCentre) || !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedRight));
+		}
+	}.initWeatherImmune();
+	
+	public static final AbstractPlaceType RAT_WARRENS_ENTRANCE = new AbstractPlaceType(
+			"Entrance",
+			"The entrance to the Rat Warrens is always guarded by at least two gang members.",
+			"submission/ratWarrens/entrance",
+			BaseColour.GREEN,
+			RatWarrensDialogue.ENTRANCE,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedCentre);
+		}
+	}.initWeatherImmune();
+	
+	public static final AbstractPlaceType RAT_WARRENS_DORMITORY_LEFT = new AbstractPlaceType(
+			"Dormitory",
+			"Bunkbeds line the walls of this damp and dingy room, while a few tables and chairs are scattered around the middle.",
+			"submission/ratWarrens/dormitory",
+			BaseColour.BROWN,
+			RatWarrensDialogue.DORMITORY,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public Population getPopulation() {
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedLeft)) {
+				if(Main.game.isExtendedWorkTime()) {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.COUPLE, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				} else {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.SEVERAL, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				}
+			}
+			return null;
+		}
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedLeft);
+		}
+	}.initWeatherImmune();
+	
+	public static final AbstractPlaceType RAT_WARRENS_DORMITORY_RIGHT = new AbstractPlaceType(
+			"Dormitory",
+			"Bunkbeds line the walls of this damp and dingy room, while a few tables and chairs are scattered around the middle.",
+			"submission/ratWarrens/dormitory",
+			BaseColour.BROWN,
+			RatWarrensDialogue.DORMITORY,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public Population getPopulation() {
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedRight)) {
+				if(Main.game.isExtendedWorkTime()) {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.COUPLE, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				} else {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.SEVERAL, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				}
+			}
+			return null;
+		}
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedRight);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_DICE_DEN = new AbstractPlaceType(
+			"Dice Den",
+			"A place where gang members go to drink and gamble.",
+			"submission/ratWarrens/diceDen",
+			BaseColour.COPPER,
+			RatWarrensDialogue.DICE_DEN,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public Population getPopulation() {
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedCentre)) {
+				if(Main.game.isExtendedWorkTime()) {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.SEVERAL, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				} else {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.COUPLE, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				}
+			}
+			return null;
+		}
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedCentre);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_MILKING_ROOM = new AbstractPlaceType(
+			"Milking Room",
+			"This is the final destination for humans unfortunate enough to have been kidnapped by Vengar's gang.",
+			"submission/ratWarrens/stocks",
+			BaseColour.MAGENTA,
+			RatWarrensDialogue.MILKING_ROOM,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public DialogueNode getDialogue(boolean withRandomEncounter, boolean forceEncounter) {
+			if(Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.playerCaptive)) {
+				dialogue = RatWarrensCaptiveDialogue.STOCKS_NIGHT;
+			} else {
+				dialogue = RatWarrensDialogue.MILKING_ROOM;
+			}
+			return super.getDialogue(withRandomEncounter, forceEncounter);
+		}
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedLeft);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_MILKING_STORAGE = new AbstractPlaceType(
+			"Milk Storage",
+			"A huge number of metal milk pails are being stored in this area; each one is marked with a bodily fluid type of one sort or another, along with what flavour it is.",
+			"submission/ratWarrens/milkingRoom",
+			BaseColour.YELLOW_LIGHT,
+			RatWarrensDialogue.MILKING_STORAGE,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile) && !Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedLeft);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_VENGARS_HALL = new AbstractPlaceType(
+			"Vengar's Hall",
+			"A huge, stone hall, filled with numerous long wooden benches and with a raised throne at the far end.",
+			"submission/ratWarrens/vengarsHall",
+			BaseColour.PURPLE,
+			RatWarrensDialogue.VENGARS_HALL,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public Encounter getEncounterType() {
+			if(Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.playerCaptive)) {
+				return Encounter.VENGAR_CAPTIVE_HALL;
+			}
+			return null;
+		}
+		@Override
+		public DialogueNode getDialogue(boolean withRandomEncounter, boolean forceEncounter) {
+			if(Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.playerCaptive)) {
+				dialogue = VengarCaptiveDialogue.VENGARS_HALL;
+			} else {
+				dialogue = RatWarrensDialogue.VENGARS_HALL;
+			}
+			return super.getDialogue(withRandomEncounter, forceEncounter);
+		}
+		@Override
+		public Population getPopulation() {
+			if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensClearedCentre)) {
+				if(Main.game.isExtendedWorkTime()) {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.NUMEROUS, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				} else {
+					return new Population(PopulationType.GANG_MEMBERS, PopulationDensity.COUPLE, Util.newHashMapOfValues(new Value<>(Subspecies.RAT_MORPH, SubspeciesSpawnRarity.FOUR_COMMON)));
+				}
+			}
+			return null;
+		}
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile);
+		}
+	}.initWeatherImmune();
+
+	public static final AbstractPlaceType RAT_WARRENS_PRIVATE_BEDCHAMBERS = new AbstractPlaceType(
+			"Private Bed-chambers",
+			"The private bed-chambers used by Vengar and his bodyguards are located adjacent to the main hall.",
+			"submission/ratWarrens/bedroom",
+			BaseColour.PURPLE_LIGHT,
+			RatWarrensDialogue.VENGARS_BEDROOM,
+			null,
+			"in the Rat Warrens") {
+		@Override
+		public Encounter getEncounterType() {
+			if(Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.playerCaptive)) {
+				return Encounter.VENGAR_CAPTIVE_BEDROOM;
+			}
+			return null;
+		}
+		@Override
+		public DialogueNode getDialogue(boolean withRandomEncounter, boolean forceEncounter) {
+			if(Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.playerCaptive)) {
+				dialogue = VengarCaptiveDialogue.VENGARS_BEDROOM;
+			} else {
+				dialogue = RatWarrensDialogue.VENGARS_BEDROOM;
+			}
+			return super.getDialogue(withRandomEncounter, forceEncounter);
+		}
+		@Override
+		public boolean isDangerous() {
+			return Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.ratWarrensHostile);
+		}
+	}.initWeatherImmune();
 	
 	
 	
@@ -3715,6 +4033,7 @@ public class PlaceType {
 	private static Map<String, AbstractPlaceType> idToPlaceMap = new HashMap<>();
 	
 	public static AbstractPlaceType getPlaceTypeFromId(String id) {
+		id.replaceAll("ALEXA", "HELENA");
 		id = Util.getClosestStringMatch(id, idToPlaceMap.keySet());
 		return idToPlaceMap.get(id);
 	}

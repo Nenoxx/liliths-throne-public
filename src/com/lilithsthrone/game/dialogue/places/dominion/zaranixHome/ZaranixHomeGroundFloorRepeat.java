@@ -81,6 +81,9 @@ public class ZaranixHomeGroundFloorRepeat {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
+				if(!Main.game.isExtendedWorkTime()) {
+					return new Response("Knock door", "Amber is certainly not going to answer the door at such an unsociable time. You'll have to come back during the day...", null);
+				}
 				if(!Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.amberRepeatEncountered)
 						&& (Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.zaranixKnockedOnDoor) || Main.game.getNpc(Amber.class).getFoughtPlayerCount()!=0)) {
 					return new Response("Knock door", "Knock on the door and wait for someone to answer.", OUTSIDE_KNOCK_ON_DOOR_KNOWS_AMBER) {
@@ -106,7 +109,7 @@ public class ZaranixHomeGroundFloorRepeat {
 				}
 
 			} else if (index == 0) {
-				return new Response("Leave", "Turn around and walk away.", Main.game.getDefaultDialogueNoEncounter());
+				return new Response("Leave", "Turn around and walk away.", Main.game.getDefaultDialogue(false));
 
 			} else {
 				return null;
@@ -1779,7 +1782,7 @@ public class ZaranixHomeGroundFloorRepeat {
 								petGender.getGenderName().isHasPenis()?petGender:(petGender.isFeminine()?Gender.F_P_V_B_FUTANARI:Gender.M_P_MALE), Main.game.getPlayer().getWorldLocation(), Main.game.getPlayer().getLocation(), false);
 						pet.setPlayerKnowsName(true);
 						owner = new GenericSexualPartner(Gender.F_P_V_B_FUTANARI, Main.game.getPlayer().getWorldLocation(), Main.game.getPlayer().getLocation(), false);
-						owner.setBody(Gender.getGenderFromUserPreferences(false, false), RacialBody.DEMON, RaceStage.GREATER);
+						owner.setBody(Gender.getGenderFromUserPreferences(false, false), RacialBody.DEMON, RaceStage.GREATER, false);
 						owner.setName(Name.getRandomTriplet(owner.getRace()));
 						
 						try {
@@ -1814,7 +1817,7 @@ public class ZaranixHomeGroundFloorRepeat {
 								pet.addFetish(Fetish.FETISH_ANAL_GIVING);
 							}
 							pet.addFetish(Fetish.FETISH_ORAL_RECEIVING);
-							pet.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.NECK_SLAVE_COLLAR), true, owner);
+							pet.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_bdsm_metal_collar", false), true, owner);
 							if(Math.random()>0.5f) {
 								pet.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.BDSM_BALLGAG), true, owner);
 							}

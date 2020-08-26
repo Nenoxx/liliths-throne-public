@@ -13,7 +13,7 @@ import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.1.0
- * @version 0.3.5
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public enum WorldType {
@@ -262,7 +262,7 @@ public enum WorldType {
 					new Value<>(new Color(0xff0000), PlaceType.HARPY_NESTS_HARPY_NEST_RED),
 					new Value<>(new Color(0xff00ff), PlaceType.HARPY_NESTS_HARPY_NEST_PINK),
 					new Value<>(new Color(0xffff00), PlaceType.HARPY_NESTS_HARPY_NEST_YELLOW),
-					new Value<>(new Color(0xff9100), PlaceType.HARPY_NESTS_ALEXAS_NEST))),
+					new Value<>(new Color(0xff9100), PlaceType.HARPY_NESTS_HELENAS_NEST))),
 	
 	SLAVER_ALLEY("Slaver Alley",
 			Colour.BASE_RED,
@@ -274,7 +274,7 @@ public enum WorldType {
 					new Value<>(new Color(0xFFFFFF), PlaceType.GENERIC_IMPASSABLE),
 					new Value<>(new Color(0x808080), PlaceType.SLAVER_ALLEY_PATH),
 					new Value<>(new Color(0xff0000), PlaceType.SLAVER_ALLEY_ENTRANCE),
-
+					
 					new Value<>(new Color(0xff80ff), PlaceType.SLAVER_ALLEY_STALL_FEMALES),
 					new Value<>(new Color(0x0080ff), PlaceType.SLAVER_ALLEY_STALL_MALES),
 					
@@ -286,6 +286,8 @@ public enum WorldType {
 					new Value<>(new Color(0x21bfc5), PlaceType.SLAVER_ALLEY_MARKET_STALL_EXCLUSIVE),
 					new Value<>(new Color(0x004080), PlaceType.SLAVER_ALLEY_MARKET_STALL_BULK),
 					new Value<>(new Color(0x008080), PlaceType.SLAVER_ALLEY_CAFE),
+					
+					new Value<>(new Color(0xbfff00), PlaceType.SLAVER_ALLEY_BOUNTY_HUNTERS),
 					
 					new Value<>(new Color(0x0000ff), PlaceType.SLAVER_ALLEY_SLAVERY_ADMINISTRATION),
 					new Value<>(new Color(0xff0080), PlaceType.SLAVER_ALLEY_SCARLETTS_SHOP),
@@ -686,6 +688,8 @@ public enum WorldType {
 					
 					new Value<>(new Color(0x00ff00), PlaceType.GAMBLING_DEN_ENTRANCE),
 					
+					new Value<>(new Color(0x4bb1d0), PlaceType.GAMBLING_DEN_OFFICE),
+					
 					new Value<>(new Color(0xffff00), PlaceType.GAMBLING_DEN_TRADER),
 					
 					new Value<>(new Color(0x0080ff), PlaceType.GAMBLING_DEN_GAMBLING),
@@ -698,24 +702,36 @@ public enum WorldType {
 		public boolean isRevealedOnStart() {
 			return true;
 		}
-	}
-	;
+	},
 	
-//	JUNGLE(6,
-//			"jungle",
-//			Colour.BASE_GREEN_LIME,
-//			240,
-//			PlaceType.WORLD_MAP_DOMINION,
-//			PlaceType.JUNGLE_ENTRANCE,
-//			PlaceType.JUNGLE_PATH,
-//			PlaceType.JUNGLE_DENSE_JUNGLE,
-//			Util.newArrayListOfValues(
-//					PlaceType.JUNGLE_BROTHEL,
-//					PlaceType.JUNGLE_CLUB,
-//					PlaceType.JUNGLE_ENTRANCE),
-//
-//			Util.newArrayListOfValues(PlaceType.JUNGLE_TENTACLE_QUEENS_LAIR));
+	RAT_WARRENS("Rat Warrens",
+			Colour.BASE_BROWN,
+			1,
+			false,
+			TeleportPermissions.NONE,
+			"/com/lilithsthrone/res/map/submission/ratWarrens/ratWarrens.png",
+			PlaceType.WORLD_MAP_DOMINION,
+			PlaceType.RAT_WARRENS_ENTRANCE,
+			Util.newHashMapOfValues(
+					new Value<>(new Color(0xFFFFFF), PlaceType.GENERIC_IMPASSABLE),
+					new Value<>(new Color(0x808080), PlaceType.RAT_WARRENS_CORRIDOR_LEFT),
+					new Value<>(new Color(0xb9b9b9), PlaceType.RAT_WARRENS_CORRIDOR),
+					new Value<>(new Color(0x3b3b3b), PlaceType.RAT_WARRENS_CORRIDOR_RIGHT),
+					new Value<>(new Color(0x00ff00), PlaceType.RAT_WARRENS_ENTRANCE),
 
+					new Value<>(new Color(0x00ffff), PlaceType.RAT_WARRENS_CHECKPOINT_LEFT),
+					new Value<>(new Color(0x80ffff), PlaceType.RAT_WARRENS_CHECKPOINT_RIGHT),
+					
+					new Value<>(new Color(0xff8080), PlaceType.RAT_WARRENS_DORMITORY_LEFT),
+					new Value<>(new Color(0xff8000), PlaceType.RAT_WARRENS_DORMITORY_RIGHT),
+					
+					new Value<>(new Color(0x0000ff), PlaceType.RAT_WARRENS_DICE_DEN),
+					new Value<>(new Color(0xffff00), PlaceType.RAT_WARRENS_MILKING_ROOM),
+					new Value<>(new Color(0xffbf00), PlaceType.RAT_WARRENS_MILKING_STORAGE),
+					new Value<>(new Color(0x8000ff), PlaceType.RAT_WARRENS_VENGARS_HALL),
+					new Value<>(new Color(0x800080), PlaceType.RAT_WARRENS_PRIVATE_BEDCHAMBERS)
+					)),
+	;
 	
 	private final String name;
 	private final String fileLocation;

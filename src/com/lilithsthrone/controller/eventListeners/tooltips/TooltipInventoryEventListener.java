@@ -53,7 +53,7 @@ import com.lilithsthrone.utils.Util;
  * Shows the tooltip at the given element's position.
  * 
  * @since 0.1.0
- * @version 0.3.4
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public class TooltipInventoryEventListener implements EventListener {
@@ -177,15 +177,27 @@ public class TooltipInventoryEventListener implements EventListener {
 			
 			if(colour!=null) {
 				tooltipSB.append("<div class='subTitle'>" + Util.capitaliseSentence(colour.getName()) + "</div>"
-						+ "<div class='picture full' style='position:relative;'>" + dyeWeapon.getWeaponType().getSVGImage(dyeWeapon.getDamageType(), colour, InventoryDialogue.dyePreviewSecondary) + "</div>");
+						+ "<div class='picture full' style='position:relative;'>"
+							+ dyeWeapon.getWeaponType().getSVGImage(dyeWeapon.getDamageType(), colour, InventoryDialogue.dyePreviewSecondary, InventoryDialogue.dyePreviewTertiary)
+						+ "</div>");
 			
 			} else if(secondaryColour!=null) {
 				tooltipSB.append("<div class='subTitle'>" + Util.capitaliseSentence(secondaryColour.getName()) + "</div>"
-						+ "<div class='picture full' style='position:relative;'>" + dyeWeapon.getWeaponType().getSVGImage(dyeWeapon.getDamageType(), InventoryDialogue.dyePreviewPrimary, secondaryColour) + "</div>");
+						+ "<div class='picture full' style='position:relative;'>"
+							+ dyeWeapon.getWeaponType().getSVGImage(dyeWeapon.getDamageType(), InventoryDialogue.dyePreviewPrimary, secondaryColour, InventoryDialogue.dyePreviewTertiary)
+						+ "</div>");
 				
-			} else if(damageType!=null) {
+			} else if(tertiaryColour!=null) {
+				tooltipSB.append("<div class='subTitle'>" + Util.capitaliseSentence(tertiaryColour.getName()) + "</div>"
+						+ "<div class='picture full' style='position:relative;'>"
+							+ dyeWeapon.getWeaponType().getSVGImage(dyeWeapon.getDamageType(), InventoryDialogue.dyePreviewPrimary, InventoryDialogue.dyePreviewSecondary, tertiaryColour)
+						+ "</div>");
+				
+			}  else if(damageType!=null) {
 				tooltipSB.append("<div class='subTitle'>" + Util.capitaliseSentence(damageType.getName()) + "</div>"
-						+ "<div class='picture full' style='position:relative;'>" + dyeWeapon.getWeaponType().getSVGImage(damageType, InventoryDialogue.dyePreviewPrimary, InventoryDialogue.dyePreviewSecondary) + "</div>");
+						+ "<div class='picture full' style='position:relative;'>"
+							+ dyeWeapon.getWeaponType().getSVGImage(damageType, InventoryDialogue.dyePreviewPrimary, InventoryDialogue.dyePreviewSecondary, InventoryDialogue.dyePreviewTertiary)
+						+ "</div>");
 			}
 			
 			Main.mainController.setTooltipContent(UtilText.parse(tooltipSB.toString()));
@@ -231,7 +243,7 @@ public class TooltipInventoryEventListener implements EventListener {
 					+ "<div class='subTitle'>" + Util.capitaliseSentence(dt.getName()) + "</div>"
 
 					+ "<div class='picture'style='position:relative; width:"+(TOOLTIP_WIDTH-24)+"px; margin:8px; padding:0; height:"+(TOOLTIP_WIDTH-24)+"px;'>"
-						+ genericWeapon.getSVGImage(dt, null, null)
+						+ genericWeapon.getSVGImage(dt, null, null, null)
 					+ "</div>"
 					+ (author.isEmpty()?"":"<div class='description' style='height:48px;'>" + author + "</div>"));
 
@@ -319,7 +331,6 @@ public class TooltipInventoryEventListener implements EventListener {
 				}
 
 			} else if (invSlot == InventorySlot.WEAPON_OFFHAND_2) {
-
 				if (equippedToCharacter != null) {
 					if (equippedToCharacter.getOffhandWeapon(1) == null) {
 						AbstractWeapon primary = equippedToCharacter.getMainWeapon(1);
@@ -349,7 +360,6 @@ public class TooltipInventoryEventListener implements EventListener {
 				}
 
 			} else if (invSlot == InventorySlot.WEAPON_OFFHAND_3) {
-
 				if (equippedToCharacter != null) {
 					if (equippedToCharacter.getOffhandWeapon(2) == null) {
 						AbstractWeapon primary = equippedToCharacter.getMainWeapon(2);
@@ -380,11 +390,10 @@ public class TooltipInventoryEventListener implements EventListener {
 
 			} else {
 				if (equippedToCharacter != null) {
-					
 					boolean renderingTattoos = false;
 					
-					if((equippedToCharacter.isPlayer() && RenderingEngine.ENGINE.isRenderingTattoosLeft())
-							|| (!equippedToCharacter.isPlayer() && RenderingEngine.ENGINE.isRenderingTattoosRight())) {
+					if((equippedToCharacter.isPlayer() && RenderingEngine.ENGINE.isRenderingTattoosLeft()) || (!equippedToCharacter.isPlayer() && RenderingEngine.ENGINE.isRenderingTattoosRight())
+							&& !invSlot.isJewellery()) {
 						renderingTattoos = true;
 					}
 						
@@ -578,7 +587,7 @@ public class TooltipInventoryEventListener implements EventListener {
 						}
 
 					} else {
-						if(renderingTattoos) {
+						if(renderingTattoos && !invSlot.isJewellery()) {
 							tattooTooltip(equippedToCharacter.getTattooInSlot(invSlot));
 						} else {
 							clothingTooltip(equippedToCharacter.getClothingInSlot(invSlot));
@@ -737,6 +746,13 @@ public class TooltipInventoryEventListener implements EventListener {
 		resetVariables();
 		this.dyeWeapon = dyeWeapon;
 		this.secondaryColour = secondaryColour;
+		return this;
+	}
+	
+	public TooltipInventoryEventListener setDyeWeaponTertiary(AbstractWeapon dyeWeapon, Colour tertiaryColour) {
+		resetVariables();
+		this.dyeWeapon = dyeWeapon;
+		this.tertiaryColour = tertiaryColour;
 		return this;
 	}
 	
@@ -1158,7 +1174,7 @@ public class TooltipInventoryEventListener implements EventListener {
 		Femininity femininityRestriction = absClothing.getClothingType().getFemininityRestriction();
 		tooltipSB.append(
 				"<span style='color:" + (absClothing.isEnchantmentKnown()?absClothing.getRarity().getColour():Colour.TEXT_GREY).toWebHexString() + ";'>"
-						+Util.capitaliseSentence(absClothing.getRarity().getName())
+						+Util.capitaliseSentence(absClothing.isEnchantmentKnown()?absClothing.getRarity().getName():"Unknown")
 				+"</span>"
 				+ " | "
 				+ (femininityRestriction==null || femininityRestriction==Femininity.ANDROGYNOUS

@@ -137,7 +137,7 @@ public class TailAnus {
 							" [npc2.Name] [npc2.moanVerb] in delight as [npc2.she] [npc2.verb(feel)] [npc.namePos] [npc.tail] stimulating [npc2.her] [npc2.asshole+], and [npc2.verb(buck)] [npc.her] [npc.hips+] back in response."));
 					break;
 				case SUB_RESISTING:
-					if(Sex.getCharacterTargetedForSexAction(this).isVaginaVirgin()) {
+					if(Sex.getCharacterTargetedForSexAction(this).isAssVirgin()) {
 						UtilText.nodeContentSB.append(UtilText.returnStringAtRandom(
 								" [npc2.A_sob+] bursts out from between [npc2.namePos] [npc2.lips+] at the thought of what's about to happen, [npc2.speech(No! Don't! Please! I-I've never done anal before! You can't do this!)]",
 
@@ -880,7 +880,7 @@ public class TailAnus {
 			switch(Sex.getSexPace(Sex.getCharacterTargetedForSexAction(this))) {
 				case DOM_GENTLE:
 					UtilText.nodeContentSB.append(UtilText.returnStringAtRandom(
-							" [npc2.Name] [npc2.verb(let)] out a soft [npc2.moan] as [npc2.she] enters [npc.herHim],"
+							" [npc2.Name] [npc2.verb(let)] out a soft [npc2.moan] as [npc2.she] [npc2.verb(enter)] [npc.herHim],"
 									+ " gently pushing [npc2.her] [npc2.tail] forwards as [npc2.she] [npc2.verb(start)] to tail-fuck [npc.namePos] [npc.asshole+].",
 
 							" With a soft [npc2.moan], [npc2.name] gently [npc2.verb(thrust)] [npc2.her] [npc2.tail] forwards,"
@@ -889,7 +889,7 @@ public class TailAnus {
 				case DOM_NORMAL:
 				case SUB_EAGER:
 					UtilText.nodeContentSB.append(UtilText.returnStringAtRandom(
-							" [npc2.Name] [npc2.verb(let)] out [npc2.a_moan+] as [npc2.she] enters [npc.herHim],"
+							" [npc2.Name] [npc2.verb(let)] out [npc2.a_moan+] as [npc2.she] [npc2.verb(enter)] [npc.herHim],"
 									+ " eagerly pushing [npc2.her] [npc2.tail] forwards as [npc2.she] [npc2.verb(start)] enthusiastically tail-fucking [npc.namePos] [npc.asshole+].",
 
 							" With [npc2.a_moan+], [npc2.name] eagerly [npc2.verb(thrust)] [npc2.her] [npc2.tail] forwards,"
@@ -897,7 +897,7 @@ public class TailAnus {
 					break;
 				case DOM_ROUGH:
 					UtilText.nodeContentSB.append(UtilText.returnStringAtRandom(
-							" [npc2.Name] [npc2.verb(let)] out [npc2.a_moan+] as [npc2.she] enters [npc.herHim],"
+							" [npc2.Name] [npc2.verb(let)] out [npc2.a_moan+] as [npc2.she] [npc2.verb(enter)] [npc.herHim],"
 									+ " and, seeking to remind [npc.name] who's in charge, [npc2.she] roughly slams [npc2.her] [npc2.tail] forwards and [npc2.verb(start)] to ruthlessly tail-fuck [npc.her] [npc.asshole+].",
 
 							" With [npc2.a_moan+], [npc2.name] roughly [npc2.verb(slam)] [npc2.her] [npc2.tail] forwards,"
@@ -905,7 +905,7 @@ public class TailAnus {
 					break;
 				case SUB_NORMAL:
 					UtilText.nodeContentSB.append(UtilText.returnStringAtRandom(
-							" [npc2.Name] [npc2.verb(let)] out [npc2.a_moan+] as [npc2.she] enters [npc.herHim], pushing [npc2.her] [npc2.tail] forwards as [npc2.she] [npc2.verb(start)] tail-fucking [npc.namePos] [npc.asshole+].",
+							" [npc2.Name] [npc2.verb(let)] out [npc2.a_moan+] as [npc2.she] [npc2.verb(enter)] [npc.herHim], pushing [npc2.her] [npc2.tail] forwards as [npc2.she] [npc2.verb(start)] tail-fucking [npc.namePos] [npc.asshole+].",
 
 							" With [npc2.a_moan+], [npc2.name] [npc2.verb(thrust)] [npc2.her] [npc2.tail] forwards, sinking it deep into [npc.namePos] [npc.asshole+] as [npc2.she] [npc2.verb(start)] tail-pegging [npc.herHim]."));
 					break;
@@ -1312,7 +1312,7 @@ public class TailAnus {
 
 		@Override
 		public boolean isBaseRequirementsMet() {
-			return Sex.getCharacterPerformingAction().getVaginaOrificeModifiers().contains(OrificeModifier.MUSCLE_CONTROL);
+			return Sex.getCharacterPerformingAction().getAssOrificeModifiers().contains(OrificeModifier.MUSCLE_CONTROL);
 		}
 
 		@Override

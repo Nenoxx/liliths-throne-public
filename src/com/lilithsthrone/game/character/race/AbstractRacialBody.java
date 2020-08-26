@@ -185,9 +185,9 @@ public abstract class AbstractRacialBody {
 				NippleShape femaleNippleShape, AreolaeSize femaleAreolaeSize, int femaleNippleCountPerBreast, AbstractBreastType breastCrotchType,
 			List<BreastShape> breastCrotchShapes, CupSize breastCrotchSize,
 			int breastCrotchCount, Lactation breastCrotchLactationRate, Capacity breastCrotchCapacity, OrificeElasticity breastCrotchElasticity, OrificePlasticity breastCrotchPlasticity, NippleSize breastCrotchNippleSize,
-				NippleShape breastCrotchNippleShape, AreolaeSize breastCrotchAreolaeSize, int nippleCountPerBreastCrotch, int maleHeight,
-			int maleFemininity, int maleBodySize, int maleMuscle, int femaleHeight,
-			int femaleFemininity, int femaleBodySize, int femaleMuscle, AbstractEarType earType,
+				NippleShape breastCrotchNippleShape, AreolaeSize breastCrotchAreolaeSize, int nippleCountPerBreastCrotch,
+			int maleHeight, int maleFemininity, int maleBodySize, int maleMuscle,
+			int femaleHeight, int femaleFemininity, int femaleBodySize, int femaleMuscle, AbstractEarType earType,
 			EyeType eyeType,
 			FaceType faceType,
 			LipSize maleLipSize, LipSize femaleLipSize, HairType hairType,
@@ -365,7 +365,11 @@ public abstract class AbstractRacialBody {
 		
 		for(PersonalityTrait trait : PersonalityTrait.values()) {
 			if(trait.getPersonalityCategory()==PersonalityCategory.SPEECH) {
-				map.put(trait, 0.01f); // Speech-related traits should be rare for a normal race.
+				if(trait==PersonalityTrait.MUTE) {
+					map.put(trait, 0.001f); // Mute should be very rare.
+				} else {
+					map.put(trait, 0.01f); // Speech-related traits should be rare for a normal race.
+				}
 				
 			} else if(trait.getPersonalityCategory()==PersonalityCategory.SEX && trait!=PersonalityTrait.LEWD) {
 				map.put(trait, 0.02f); // Smaller chance for people to be prude or innocent.

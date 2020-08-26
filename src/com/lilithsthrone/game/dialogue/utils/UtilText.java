@@ -1,6 +1,7 @@
 package com.lilithsthrone.game.dialogue.utils;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +50,7 @@ import com.lilithsthrone.game.character.body.valueEnums.GenitalArrangement;
 import com.lilithsthrone.game.character.body.valueEnums.HornLength;
 import com.lilithsthrone.game.character.body.valueEnums.LegConfiguration;
 import com.lilithsthrone.game.character.body.valueEnums.Muscle;
+import com.lilithsthrone.game.character.body.valueEnums.NippleShape;
 import com.lilithsthrone.game.character.effects.AbstractPerk;
 import com.lilithsthrone.game.character.effects.Perk;
 import com.lilithsthrone.game.character.effects.StatusEffect;
@@ -180,7 +182,10 @@ public class UtilText {
 		
 		modifiedSentence = splitOnConditional[splitOnConditional.length-1];
 		
-		if(!parserTags.contains(ParserTag.SEX_ALLOW_MUFFLED_SPEECH)
+		if(target.hasPersonalityTrait(PersonalityTrait.MUTE)) {
+			modifiedSentence = Util.replaceWithMute(modifiedSentence, Main.game.isInSex() && Sex.getAllParticipants().contains(target));
+			
+		} else if(!parserTags.contains(ParserTag.SEX_ALLOW_MUFFLED_SPEECH)
 				&& Main.game.isInSex()
 				&& Sex.getAllParticipants().contains(target)
 				&& target.isSpeechMuffled()) {
@@ -444,15 +449,15 @@ public class UtilText {
 	}
 	
 	public static String formatVirginityLoss(String s) {
-		return "<p style='text-align:center; color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'><i>"+s+"</i></p>";
+		return "<p style='text-align:center; color:"+Colour.GENERIC_TERRIBLE.toWebHexString()+";'><i>"+s+"</i></p>";
 	}
 	
 	public static String formatTooLoose(String s) {
-		return "<p style='text-align:center; color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'><i>"+s+"</i></p>";
+		return "<p style='text-align:center; color:"+Colour.GENERIC_MINOR_BAD.toWebHexString()+";'><i>"+s+"</i></p>";
 	}
 	
 	public static String formatStretching(String s) {
-		return "<p style='text-align:center; color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'><i>"+s+"</i></p>";
+		return "<p style='text-align:center; color:"+Colour.GENERIC_BAD.toWebHexString()+";'><i>"+s+"</i></p>";
 	}
 
 	public static boolean isVowel(char c) {
@@ -1401,6 +1406,19 @@ public class UtilText {
 					return character.getSlaveJob(Main.game.getHourOfDay()).getName(character);
 				}
 				return character.getHistory().getName();
+			}
+		});
+		
+		commandsList.add(new ParserCommand(
+				Util.newArrayListOfValues(
+						"desiredJob"),
+				true,
+				true,
+				"",
+				"Returns the name of this character's desired job."){
+			@Override
+			public String parse(List<GameCharacter> specialNPCs, String command, String arguments, String target, GameCharacter character) {
+				return character.getDesiredJobs().iterator().next().getName();
 			}
 		});
 		
@@ -3080,7 +3098,8 @@ public class UtilText {
 				Util.newArrayListOfValues(
 						"eagerly",
 						"gently",
-						"roughly"),
+						"roughly",
+						"sexPaceVerb"),
 				true,
 				false,
 				"(Alternative start string)",
@@ -3745,7 +3764,7 @@ public class UtilText {
 				true,
 				true,
 				"",
-				"Returns 'morning' in the morning, 'afternoon' in the afternoon, or 'evening' in the evening, and night."){//TODO
+				"Returns 'morning' in the morning, 'afternoon' in the afternoon, or 'evening' in the evening, and night."){
 			@Override
 			public String parse(List<GameCharacter> specialNPCs, String command, String arguments, String target, GameCharacter character) {
 				int hour = Main.game.getHourOfDay();
@@ -3891,7 +3910,25 @@ public class UtilText {
 
 
 		// Units
-
+		
+		commandsList.add(new ParserCommand(
+				Util.newArrayListOfValues(
+						"time"),
+				true,
+				false,
+				"(hours to convert)",
+				"Returns the converted hours into a time reading.") {
+			@Override
+			public String parse(List<GameCharacter> specialNPCs, String command, String arguments, String target, GameCharacter character) {
+				if (arguments == null || arguments.isEmpty()) {
+					return "NaN";
+				}
+				double time = Double.valueOf(arguments);
+				LocalDateTime now = Main.game.getDateNow();
+				return Units.time(LocalDateTime.of(now.getYear(), now.getMonthValue(), now.getDayOfMonth(), (int) time, Math.min(59, (int)((time%1)*60))));
+			}
+		});
+		
 		commandsList.add(new ParserCommand(
 				Util.newArrayListOfValues(
 						"size"),
@@ -6518,6 +6555,9 @@ public class UtilText {
 		}
 		for(BodyMaterial material : BodyMaterial.values()) {
 			engine.put("BODY_MATERIAL_"+material.toString(), material);
+		}
+		for(NippleShape nippleShape : NippleShape.values()) {
+			engine.put("NIPPLE_SHAPE_"+nippleShape.toString(), nippleShape);
 		}
 		for(Fetish f : Fetish.values()) {
 			engine.put(f.toString(), f);
