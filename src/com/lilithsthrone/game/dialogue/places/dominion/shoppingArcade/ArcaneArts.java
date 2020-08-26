@@ -18,7 +18,6 @@ import com.lilithsthrone.game.dialogue.responses.ResponseTrade;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.item.AbstractItem;
-import com.lilithsthrone.game.inventory.item.AbstractItemType;
 import com.lilithsthrone.game.inventory.item.ItemType;
 import com.lilithsthrone.game.inventory.weapon.AbstractWeapon;
 import com.lilithsthrone.game.sex.SexPace;
@@ -27,12 +26,10 @@ import com.lilithsthrone.game.sex.positions.slots.SexSlotDesk;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
 import com.lilithsthrone.utils.Util.Value;
-import com.lilithsthrone.world.WorldType;
-import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.1.82
- * @version 0.3.2
+ * @version 0.3.7.9
  * @author Innoxia
  */
 public class ArcaneArts {
@@ -43,23 +40,25 @@ public class ArcaneArts {
 		public String getContent() {
 			return UtilText.parseFromXMLFile("places/dominion/shoppingArcade/arcaneArts", "EXTERIOR");
 		}
+
+		@Override
+		public String getResponseTabTitle(int index) {
+			return ShoppingArcadeDialogue.getCoreResponseTab(index);
+		}
 		
 		@Override
 		public Response getResponse(int responseTab, int index) {
-			if (index == 1) {
-				return new Response("Enter", "Step inside Arcane Arts.", SHOP_WEAPONS);
-				
-			} else if (index == 6) {
-				return new Response("Arcade Entrance", "Fast travel to the entrance to the arcade.", ShoppingArcadeDialogue.ENTRY){
-					@Override
-					public void effects() {
-						Main.game.getPlayer().setLocation(WorldType.SHOPPING_ARCADE, PlaceType.SHOPPING_ARCADE_ENTRANCE);
+			if(responseTab==0) {
+				if (index == 1) {
+					if(Main.game.isExtendedWorkTime()) {
+						return new Response("Enter", "Step inside Arcane Arts.", SHOP_WEAPONS);
+					} else {
+						return new Response("Enter", "Arcane Arts is currently closed. You'll have to come back later if you want to do some shopping here.", null);
 					}
-				};
-
-			} else {
-				return null;
+				}
 			}
+			
+			return ShoppingArcadeDialogue.getFastTravelResponses(responseTab, index);
 		}
 	};
 	
@@ -146,7 +145,15 @@ public class ArcaneArts {
 					}
 					
 				} else {
-					if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true) || (Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true) && Main.game.getPlayer().hasVagina())) {
+					if((!Main.game.isAnalContentEnabled() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true))
+							&& (!Main.game.getPlayer().hasVagina() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true))) {
+						return new Response("Offer body",
+								"Vicky needs to be able to access your "
+									+ (Main.game.isAnalContentEnabled()?"anus":"")
+									+ (Main.game.getPlayer().hasVagina()?(Main.game.isAnalContentEnabled()?" or ":"")+"vagina":"")+"!",
+								null);
+						
+					} else {
 						return new ResponseSex("Offer body", "Let Vicky use your body.",
 								Util.newArrayListOfValues(Fetish.FETISH_SUBMISSIVE), null, CorruptionLevel.TWO_HORNY, null, null, null,
 								true, false,
@@ -157,14 +164,19 @@ public class ArcaneArts {
 								null,
 								VICKY_POST_SEX,
 								UtilText.parseFromXMLFile("places/dominion/shoppingArcade/arcaneArts", "SHOP_WEAPONS_OFFER_BODY"));
-					} else {
-						return new Response("Offer body", "Vicky needs to be able to access your anus"+(Main.game.getPlayer().hasVagina()?" or vagina":"")+"!", null);
 					}
 				}
 				
 			} else if (index == 6 && Main.getProperties().hasValue(PropertyValue.nonConContent) && Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.arthursPackageObtained)) {
-				if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true) || (Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true) && Main.game.getPlayer().hasVagina())) {
+				if((!Main.game.isAnalContentEnabled() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true))
+						&& (!Main.game.getPlayer().hasVagina() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true))) {
+					return new Response("Nervously leave",
+							"Vicky needs to be able to access your "
+								+ (Main.game.isAnalContentEnabled()?"anus":"")
+								+ (Main.game.getPlayer().hasVagina()?(Main.game.isAnalContentEnabled()?" or ":"")+"vagina":"")+"!",
+							null);
 					
+				} else {
 					return new ResponseSex("Nervously leave", "Vicky is far too intimidating for you... Turn around and try to escape from her gaze. [style.boldBad(You get the feeling that this will result in non-consensual sex...)]",
 							Util.newArrayListOfValues(
 									Fetish.FETISH_SUBMISSIVE,
@@ -185,15 +197,13 @@ public class ArcaneArts {
 							null,
 							VICKY_POST_SEX_RAPE,
 							UtilText.parseFromXMLFile("places/dominion/shoppingArcade/arcaneArts", "SHOP_WEAPONS_RAPE"));
-					
-				} else {
-					return new Response("Nervously leave", "Vicky needs to be able to access your anus"+(Main.game.getPlayer().hasVagina()?" or vagina":"")+"!", null);
 				}
 				
 			} else if (index == 0) {
 				return new Response("Leave", "Leave Arcane Arts and head back out into the arcade.", EXTERIOR) {
 					@Override
 					public void effects() {
+						Main.game.setResponseTab(0);
 						Main.game.getDialogueFlags().setFlag(DialogueFlagValue.vickyIntroduced, true);
 					}
 				};
@@ -219,7 +229,7 @@ public class ArcaneArts {
 						@Override
 						public void effects() {
 							Main.game.getDialogueFlags().setFlag(DialogueFlagValue.arthursPackageObtained, true);
-							Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addItem(AbstractItemType.generateItem(ItemType.ARTHURS_PACKAGE), false, true));
+							Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addItem(Main.game.getItemGen().generateItem(ItemType.ARTHURS_PACKAGE), false, true));
 							Main.game.getPlayer().incrementMoney(-100);
 						}
 					};
@@ -228,7 +238,15 @@ public class ArcaneArts {
 				}
 				
 			} else if (index == 2) {
-				if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true) || (Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true) && Main.game.getPlayer().hasVagina())) {
+				if((!Main.game.isAnalContentEnabled() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true))
+						&& (!Main.game.getPlayer().hasVagina() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true))) {
+					return new Response("Offer body",
+							"Vicky needs to be able to access your "
+								+ (Main.game.isAnalContentEnabled()?"anus":"")
+								+ (Main.game.getPlayer().hasVagina()?(Main.game.isAnalContentEnabled()?" or ":"")+"vagina":"")+"!",
+							null);
+					
+				} else {
 					return new ResponseSex("Offer body", "Let Vicky use your body as payment for the fee.",
 							Util.newArrayListOfValues(Fetish.FETISH_SUBMISSIVE), null, CorruptionLevel.TWO_HORNY, null, null, null,
 							true, false,
@@ -239,19 +257,27 @@ public class ArcaneArts {
 							null,
 							VICKY_POST_SEX_PACKAGE,
 							UtilText.parseFromXMLFile("places/dominion/shoppingArcade/arcaneArts", "ARTHURS_PACKAGE_SEX"));
-				} else {
-					return new Response("Offer body", "Vicky needs to be able to access your anus"+(Main.game.getPlayer().hasVagina()?" or vagina":"")+"!", null);
+					
 				}
 				
 			} else if (index == 3 && Main.getProperties().hasValue(PropertyValue.nonConContent)) {
-				if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true) || (Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true) && Main.game.getPlayer().hasVagina())) {
+				if((!Main.game.isAnalContentEnabled() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true))
+						&& (!Main.game.getPlayer().hasVagina() || !Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true))) {
+					return new Response("Weakly refuse",
+							"Vicky needs to be able to access your "
+								+ (Main.game.isAnalContentEnabled()?"anus":"")
+								+ (Main.game.getPlayer().hasVagina()?(Main.game.isAnalContentEnabled()?" or ":"")+"vagina":"")+"!",
+							null);
 					
+				} else {
 					return new ResponseSex(
 							"Weakly refuse",
-							"You can't bring yourself to say no to such an intimidating person... Try to wriggle free and leave... [style.boldBad(You get the feeling that this will result in non-consensual sex...)]",
+							"You can't bring yourself to say no to such an intimidating person... Try to wriggle free and leave..."
+									+ "<br/>[style.boldBad(You get the feeling that this will result in non-consensual sex...)]",
 							Util.newArrayListOfValues(
 									Fetish.FETISH_SUBMISSIVE,
-									Fetish.FETISH_NON_CON_SUB), null, CorruptionLevel.FOUR_LUSTFUL, null, null, null,
+									Fetish.FETISH_NON_CON_SUB),
+							null, CorruptionLevel.FOUR_LUSTFUL, null, null, null,
 							false, false,
 							new SMVickyOverDesk(
 									Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Vicky.class), SexSlotDesk.BETWEEN_LEGS)),
@@ -268,9 +294,6 @@ public class ArcaneArts {
 							null,
 							VICKY_POST_SEX_RAPE_PACKAGE,
 							UtilText.parseFromXMLFile("places/dominion/shoppingArcade/arcaneArts", "ARTHURS_PACKAGE_RAPE"));
-					
-				} else {
-					return new Response("Weakly refuse", "Vicky needs to be able to access your anus"+(Main.game.getPlayer().hasVagina()?" or vagina":"")+"!", null);
 				}
 				
 			} else if (index == 0) {

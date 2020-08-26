@@ -4,7 +4,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.lilithsthrone.game.character.npc.misc.GenericFemaleNPC;
-import com.lilithsthrone.game.character.npc.misc.GenericMaleNPC;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
 import com.lilithsthrone.utils.XMLSaving;
@@ -16,7 +15,8 @@ import com.lilithsthrone.utils.XMLSaving;
  */
 public class PregnancyPossibility implements XMLSaving {
 	
-	private String motherId, fatherId;
+	private String motherId;
+	private String fatherId;
 	private float probability;
 	
 	public PregnancyPossibility(String motherId, String fatherId, float probability) {
@@ -83,10 +83,7 @@ public class PregnancyPossibility implements XMLSaving {
 		try {
 			return Main.game.getNPCById(fatherId);
 		} catch (Exception e) {
-			if(!fatherId.equals("NOT_SET")) {
-				Util.logGetNpcByIdError("PregnancyPossibility.getFather()", fatherId);
-			}
-			return Main.game.getNpc(GenericMaleNPC.class);
+			return null;
 		}
 	}
 

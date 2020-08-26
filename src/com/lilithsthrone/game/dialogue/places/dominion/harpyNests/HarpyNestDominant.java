@@ -11,10 +11,9 @@ import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.responses.Response;
 import com.lilithsthrone.game.dialogue.responses.ResponseCombat;
 import com.lilithsthrone.game.dialogue.responses.ResponseSex;
+import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.enchanting.ItemEffectType;
-import com.lilithsthrone.game.inventory.item.AbstractItemType;
 import com.lilithsthrone.game.inventory.item.ItemType;
-import com.lilithsthrone.game.sex.Sex;
 import com.lilithsthrone.game.sex.managers.universal.SMGeneric;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
@@ -22,7 +21,7 @@ import com.lilithsthrone.world.Weather;
 
 /**
  * @since 0.1.8
- * @version 0.1.97
+ * @version 0.3.5.5
  * @author Innoxia
  */
 public class HarpyNestDominant {
@@ -41,75 +40,28 @@ public class HarpyNestDominant {
 
 		@Override
 		public String getContent() {
-			if (Main.game.getCurrentWeather()==Weather.MAGIC_STORM) {
-				if(Main.game.getDialogueFlags().values.contains(DialogueFlagValue.dominantEncountered)) {
-					return "<p>"
-								+ "Due to the ongoing arcane storm, [harpyDominant.namePos] nest is completely deserted."
-								+ " Her entire flock has retreated into the safety of the upper-floor of the building below, leaving you with no choice but to return at another time if you wanted to speak to her."
-							+ "</p>";
-				} else {
-					return "<p>"
-							+ "Due to the ongoing arcane storm, this nest is completely deserted."
-							+ " The entire flock has retreated into the safety of the upper-floor of the building below, leaving you with no choice but to return at another time if you wanted to speak to the matriarch of this particular nest."
-						+ "</p>";
-				}
-				
-			} else {
-				if(Main.game.getDialogueFlags().values.contains(DialogueFlagValue.dominantEncountered)) {
-					return "<p>"
-								+ "You find yourself standing on the outskirts of [harpyDominant.namePos] nest; one of the largest and most populous of all the nests in Dominion."
-								+ " A single, gigantic platform spans the roof-tops of several buildings, with little raised podiums scattered about its surface."
-								+ (Main.game.isDayTime()
-										?""
-										:" A series of bright, arcane-powered lights illuminate the entire nest, revealing that the harpies here are just as active at night as they are during daylight hours.")
-							+ "</p>"
-							+ "<p>"
-								+ "Looking closer at the nest's peculiar podiums, you see that there's a red-and-black feathered harpy perched on top of each one."
-								+ " Around the base of each one of these podiums, a crowd of harpies can be seen huddling together, and upon further inspection you notice that they're all bowing down in submission."
-								+ " Curiously, although you can see harpies of almost every colour, the only ones with red or black feathers seem to be those who are sitting on top of those podiums,"
-									+ " leading you to believe that those particular colours designate the important members of this particular flock."
-							+ "</p>"
-							+ "<p>"
-								+ "At the very centre of the platform, you see a podium that's higher than all the rest, and, lounging about on top of it, you see the familiar shape of [harpyDominant.name]."
-								+ " The group surrounding her is unlike all the others, as it's made up solely of the same red-and-black feathered harpies that you can see on top of the other podiums."
-								+ " Despite their somewhat aggressive appearance, the harpies of this flock don't seem to be too bothered by your presence, allowing you to approach [harpyDominant.name] if you had any business with her."
-							+ "</p>";
-					
-				} else {
-					return "<p>"
-						+ "You find yourself standing on the outskirts of one of the largest and most populous of all the nests in Dominion."
-						+ " A single, gigantic platform spans the roof-tops of several buildings, with little raised podiums scattered about its surface."
-						+ (Main.game.isDayTime()
-								?""
-								:" A series of bright, arcane-powered lights illuminate the entire nest, revealing that the harpies here are just as active at night as they are during daylight hours.")
-					+ "</p>"
-					+ "<p>"
-						+ "Looking closer at the nest's peculiar podiums, you see that there's a red-and-black feathered harpy perched on top of each one."
-						+ " Around the base of each one of these podiums, a crowd of harpies can be seen huddling together, and upon further inspection you notice that they're all bowing down in submission."
-						+ " Curiously, although you can see harpies of almost every colour, the only ones with red or black feathers seem to be those who are sitting on top of those podiums,"
-							+ " leading you to believe that those particular colours designate the important members of this particular flock."
-					+ "</p>"
-					+ "<p>"
-						+ "At the very centre of the platform, you see a podium that's higher than all the rest, and, lounging about on top of it, you see what must be this nest's matriarch."
-						+ " The group surrounding her is unlike all the others, as it's made up solely of the same red-and-black feathered harpies that you can see on top of the other podiums."
-						+ " Despite their somewhat aggressive appearance, the harpies of this flock don't seem to be too bothered by your presence, allowing you to approach their matriarch if you had any business with her."
-					+ "</p>";
-				}
-			}
+			return UtilText.parseFromXMLFile("places/dominion/harpyNests/dominant", "HARPY_NEST_DOMINANT");
 		}
 
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if (index == 1) {
-				if(!Main.game.getPlayer().hasQuest(QuestLine.SIDE_HARPY_PACIFICATION)) {
-					return new Response("Approach [harpyDominant.name]", "You have no need to talk to the matriarch of this nest.", null);
-					
+				if(!Main.game.isExtendedWorkTime()) {
+					if(Main.game.getDialogueFlags().values.contains(DialogueFlagValue.bimboEncountered)) {
+						return new Response("Approach [harpyDominant.name]", "Both [harpyDominant.name] and her flock are sleeping in the buildings below her nest. You'll have to come back during the day if you want to speak with her.", null);
+					} else {
+						return new Response("Approach matriarch", "The matriarch and her flock are sleeping in the buildings below her nest. You'll have to come back during the day if you want to speak with her.", null);
+					}
+						
 				} else if (Main.game.getCurrentWeather()==Weather.MAGIC_STORM) {
 					if(Main.game.getDialogueFlags().values.contains(DialogueFlagValue.dominantEncountered)) {
 						return new Response("Approach [harpyDominant.name]", "If you want to talk to [harpyDominant.name], you'll have to come back after the arcane storm has passed.", null);
 					} else {
 						return new Response("Approach matriarch", "If you want to talk to the matriarch, you'll have to come back after the arcane storm has passed.", null);
 					}
+					
+				} else if(!Main.game.getPlayer().hasQuest(QuestLine.SIDE_HARPY_PACIFICATION)) {
+					return new Response("Approach [harpyDominant.name]", "You have no need to talk to the matriarch of this nest.", null);
 					
 				} else {
 					if(Main.game.getDialogueFlags().values.contains(DialogueFlagValue.dominantEncountered)) {
@@ -325,7 +277,7 @@ public class HarpyNestDominant {
 						public void effects() {
 							Main.game.getDialogueFlags().values.add(DialogueFlagValue.dominantEncountered);
 							Main.game.getDialogueFlags().values.add(DialogueFlagValue.dominantPacified);
-							Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addItem(AbstractItemType.generateItem(ItemType.HARPY_MATRIARCH_DOMINANT_PERFUME), false, true));
+							Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addItem(Main.game.getItemGen().generateItem(ItemType.HARPY_MATRIARCH_DOMINANT_PERFUME), false, true));
 							
 							if(Main.game.getPlayer().getQuest(QuestLine.SIDE_HARPY_PACIFICATION) == Quest.HARPY_PACIFICATION_ONE) {
 								Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().setQuestProgress(QuestLine.SIDE_HARPY_PACIFICATION, Quest.HARPY_PACIFICATION_TWO));
@@ -407,7 +359,7 @@ public class HarpyNestDominant {
 					@Override
 					public void effects() {
 						Main.game.getDialogueFlags().values.add(DialogueFlagValue.dominantPacified);
-						Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addItem(AbstractItemType.generateItem(ItemType.HARPY_MATRIARCH_DOMINANT_PERFUME), false, true));
+						Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().addItem(Main.game.getItemGen().generateItem(ItemType.HARPY_MATRIARCH_DOMINANT_PERFUME), false, true));
 						
 						if(Main.game.getPlayer().getQuest(QuestLine.SIDE_HARPY_PACIFICATION) == Quest.HARPY_PACIFICATION_ONE) {
 							Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().setQuestProgress(QuestLine.SIDE_HARPY_PACIFICATION, Quest.HARPY_PACIFICATION_TWO));
@@ -531,7 +483,7 @@ public class HarpyNestDominant {
 					+ "<p>"
 						+ "[harpyDominant.Name] shuffles closer, letting out a submissive little mewling sound as she responds,"
 						+ " [harpyDominant.speech(Yes "+(Main.game.getPlayer().isFeminine()?"Mistress":"Master")+"! I'll do as you command!"
-								+ " I'll be your good girl! Please, "+(Main.game.getPlayer().isFeminine()?"Mistress":"Master")+", take special perfume as a sign of my submission to you!)]"
+								+ " I'll be your good girl! Please, "+(Main.game.getPlayer().isFeminine()?"Mistress":"Master")+", take this special perfume as a sign of my submission to you!)]"
 					+ "</p>"
 					+ "<p>"
 						+ "Producing a dark red bottle of perfume, [harpyDominant.name] holds it out towards you."
@@ -839,7 +791,7 @@ public class HarpyNestDominant {
 					+ "You can't help but grin as the harpies all call out in agreement."
 					+ " With her flock now firmly under your control, [harpyDominant.Name] shuffles closer, letting out a submissive little mewling sound."
 					+ " [harpyDominant.speech(M-"+(Main.game.getPlayer().isFeminine()?"Mistress":"Master")+"! I'll do as you command!"
-							+ " I'll be your good girl! Please, take special perfume as a sign of my submission to you!)]"
+							+ " I'll be your good girl! Please, take this special perfume as a sign of my submission to you!)]"
 				+ "</p>"
 				+ "<p>"
 					+ "Producing a dark red bottle of perfume, [harpyDominant.name] holds it out towards you."
@@ -1025,9 +977,9 @@ public class HarpyNestDominant {
 		
 		@Override
 		public String getContent() {
-			if(Sex.getNumberOfOrgasms(Main.game.getNpc(HarpyDominant.class)) >= Main.game.getNpc(HarpyDominant.class).getOrgasmsBeforeSatisfied()) {
+			if(Main.sex.getNumberOfOrgasms(Main.game.getNpc(HarpyDominant.class)) >= Main.game.getNpc(HarpyDominant.class).getOrgasmsBeforeSatisfied()) {
 				return "<p>"
-							+ "As you step back from [harpyDominant.name], she sinks to the floor, totally worn out from her orgasm"+(Sex.getNumberOfOrgasms(Main.game.getNpc(HarpyDominant.class)) > 1?"s":"")+"."
+							+ "As you step back from [harpyDominant.name], she sinks to the floor, totally worn out from her orgasm"+(Main.sex.getNumberOfOrgasms(Main.game.getNpc(HarpyDominant.class)) > 1?"s":"")+"."
 							+ " The surrounding harpies, having watched the whole thing, kneel in submission as you finish with their matriarch."
 						+ "</p>";
 			} else {

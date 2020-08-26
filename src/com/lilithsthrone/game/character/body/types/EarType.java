@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.lilithsthrone.game.character.body.abstractTypes.AbstractEarType;
+import com.lilithsthrone.game.character.race.AbstractRace;
 import com.lilithsthrone.game.character.race.Race;
 import com.lilithsthrone.utils.Util;
 
@@ -112,7 +114,7 @@ public class EarType {
 			"[npc.She] [npc.has] a pair of folded,#IF(npc.isPiercedEar()) pierced,#ENDIF dog-like ears, which are positioned high up on [npc.her] head and are [npc.materialCompositionDescriptor] [npc.earFullDescription(true)].") {
 	};
 
-	public static AbstractEarType LYCAN = new AbstractEarType(BodyCoveringType.LYCAN_FUR,
+	public static AbstractEarType WOLF_MORPH = new AbstractEarType(BodyCoveringType.LYCAN_FUR,
 			Race.WOLF_MORPH,
 			false,
 			"wolf",
@@ -432,6 +434,9 @@ public class EarType {
 		if(id.equals("IMP")) {
 			return EarType.DEMON_COMMON;
 		}
+		if(id.equals("LYCAN")) {
+			return EarType.WOLF_MORPH;
+		}
 		id = Util.getClosestStringMatch(id, idToEarMap.keySet());
 		return idToEarMap.get(id);
 	}
@@ -444,9 +449,9 @@ public class EarType {
 		return allEarTypes;
 	}
 	
-	private static Map<Race, List<AbstractEarType>> typesMap = new HashMap<>();
+	private static Map<AbstractRace, List<AbstractEarType>> typesMap = new HashMap<>();
 	
-	public static List<AbstractEarType> getEarTypes(Race r) {
+	public static List<AbstractEarType> getEarTypes(AbstractRace r) {
 		if(typesMap.containsKey(r)) {
 			return typesMap.get(r);
 		}

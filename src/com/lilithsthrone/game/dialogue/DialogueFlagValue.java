@@ -2,7 +2,7 @@ package com.lilithsthrone.game.dialogue;
 
 /**
  * @since 0.1.89
- * @version 0.3.3.10
+ * @version 0.3.8.9
  * @author Innoxia
  */
 public enum DialogueFlagValue {
@@ -30,6 +30,10 @@ public enum DialogueFlagValue {
 	talkedWithDaddy,
 	daddySendingReward,
 	
+	coveringChangeListenersRequired, // Set to false on every Response preparsing, and only set to true in getKatesDivCoveringsNew(). Used for setting up listeners in MainControllerInitMethod.
+
+	badEnd, // When the game is in a state of a bad end (meaning that the player is in an inescapable gameplay loop)
+	
 	// Gym:
 	gymIntroduced,
 	gymHadTour,
@@ -52,6 +56,8 @@ public enum DialogueFlagValue {
 	axelIntroduced,
 	eponaIntroduced,
 	elizabethIntroduced,
+	vengarIntroduced,
+	murkIntroduced,
 	
 	
 	// Red-light district:
@@ -70,14 +76,16 @@ public enum DialogueFlagValue {
 	
 	// Shopping arcade:
 	ralphAskedAboutHundredKisses,
+	ralphDailyBred(true),
 	
-	nyanTalkedTo,
-	nyanComplimented,
-	nyanFlirtedWith,
-	nyanKissed,
-	nyanMakeOut,
-	nyanSex,
-	nyanGift,
+	nyanTalkedTo(true),
+	nyanComplimented(true),
+	nyanFlirtedWith(true),
+	nyanHeadPatted(true),
+	nyanKissed(true),
+	nyanMakeOut(true),
+	nyanSex(true),
+	nyanGift(true),
 	
 	supplierDepotDoorUnlocked,
 	suppliersEncountered,
@@ -100,6 +108,7 @@ public enum DialogueFlagValue {
 	essenceExtractionKnown,
 	roseToldOnYou,
 	lilayaReactedToPlayerAsDemon,
+	lilayaHug(true),
 	
 	readBook1,
 	readBook2,
@@ -129,11 +138,73 @@ public enum DialogueFlagValue {
 	dominantPacified,
 	nymphoEncountered,
 	nymphoPacified,
-	punishedByAlexa,
+	punishedByHelena,
+	scarlettRelaxed(true),
 	
 	// Slaver Alley:
 	finchIntroduced,
+	seanIntroduced,
+	seanSeenBrax,
 	statueTruthRevealed,
+	slaverAlleyTalked,
+	slaverAlleyTalkedBraxReveal,
+	slaverAlleyTalkedFreedSlaves,
+	slaverAlleyComplained,
+	slaverAlleyVisitedHiddenAlleyway,
+	slaverAlleyBribed,
+	slaverAlleyTookPlace,
+	slaverAlleyCompanionInStocks,
+	slaverAlleyAcceptedDeal,
+	slaverAlleyCompanionAcceptedDeal,
+	slaverAlleyTwoPartners,
+	slaverAlleySlavesFreed, // Reset every day at midnight (as part of stocks reset method)
+	
+	// Wes:
+	wesQuestLilayaHelp,
+	
+	// Helena (romance quest):
+	helenaCheapPaint,
+	helenaGoneHome(true),
+	scarlettGoneHome(true),
+	helenaScarlettToldToReturn,
+	helenaScarlettSleepoverSex,
+
+	// Helena (post-romance quest):
+	helenaSlutSeen,
+	helenaShopTalkedTo(true),
+	helenaShopFucked(true),
+	helenaNestTalkedTo(true),
+	helenaNestFucked(true),
+	helenaShopScarlettTalkedTo(true),
+	helenaShopScarlettCounterOral(true),
+	helenaShopScarlettCafe(true),
+	helenaShopScarlettCafeRevealed,
+	helenaShopScarlettExtraTransformationDiscussed,
+	helenaShopScarlettExtraTransformationApplied,
+	helenaShopScarlettExtraTransformationHelenaReacted,
+	
+	helenaDateApartmentSeen,
+	helenaDateFirstDateComplete,
+	helenaDateRomanticSetup,
+	helenaDateRomanticSetupEatenOut,
+	helenaGift(true),
+	helenaDateSexLifeTalk,
+	helenaDateVirginityTalk,
+	helenaScarlettThreesome,
+	
+	helenaBedroomFromNest,
+	
+	// Natalya:
+	playerSubmittedToNatalya,
+	natalyaDemandedFacial,
+	playerReceivedNatalyaFacial,
+	
+	natalyaVisited,
+	natalyaInterviewOffered,
+	natalyaBusy(true),
+	natalyaDailySexAsSub(true),
+	natalyaDailySexAsDom(true),
+	
 	
 	// Zaranix:
 	zaranixDiscoveredHome,
@@ -167,10 +238,24 @@ public enum DialogueFlagValue {
 	slimeQueenForced,
 	
 	// Gambling Den:
-	axelToldAboutVengar,
+	axelMentionedVengar,
+	axelExplainedVengar,
+	axelToldSubmit,
+	
+	axelSissified,
+	axelFeminised,
+	axelClothingFeminine,
+	axelClothingWhore,
+	axelClothingMaid,
+	
 	roxyAddicted,
+	roxyVengarOwnerIntroduced,
 	playedPregnancyRouletteAsMother,
 	playedPregnancyRouletteAsBreeder,
+	
+	eponaMurkOwnerIntroduced,
+	eponaMurkSeen,
+	eponaMurkSubmitted,
 	
 	// Nightlife:
 	julesIntroduced,
@@ -228,5 +313,73 @@ public enum DialogueFlagValue {
 
 	meraxisRepeatDemonTF,
 	
+	
+	// Rat warrens:
+	
+	ratWarrensEntry,
+	ratWarrensEntryWhore,
+	ratWarrensHostile,
+	ratWarrensEntranceGuardsFight,
+	ratWarrensSeenMilkers,
+	ratWarrensMilkersBackground,
+	ratWarrensMilkersFreeAttempt,
+	ratWarrensSilenceIntroduced,
+	
+	ratWarrensClearedLeft,
+	ratWarrensClearedCentre,
+	ratWarrensClearedRight,
+	
+	ratWarrensLootedDiceDen,
+	
+	vengarThreatened,
+	vengarPersuaded,
+	vengarSeduced,
+	ratWarrensUsedResonanceStone,
+
+	vengarCaptiveRoomCleaned(true),
+	vengarCaptiveVengarSatisfied(true),
+	vengarCaptiveShadowSatisfied(true),
+	vengarCaptiveSilenceSatisfied(true),
+	vengarCaptiveCompanionGivenBirth(true),
+	vengarCaptiveGangBanged(true),
+
+	ratWarrensCaptiveInitialNightDescription,
+	ratWarrensCaptiveAttemptingEscape,
+	ratWarrensCaptiveEscaped,
+//	ratWarrensCaptiveTransformationsStarted,
+	
+	ratWarrensCaptiveFeminine,
+	ratWarrensCaptiveFuta,
+	ratWarrensCaptiveMasculine,
+	ratWarrensCaptiveSissy,
+
+	murkCaptiveBlowjob,
+	murkMaster,
+	
+	ratWarrensCaptiveCalledOut,
+	ratWarrensCaptiveWashed,
+	
+	ratWarrensCaptiveCompanionGivenBirth(true),
+	ratWarrensCaptiveOwnerSex(true),
+	ratWarrensCaptiveOwnerCompanionSex(true),
+	ratWarrensCaptiveDailyTransformed(true),
+
+	murkLectured(true),
+	murkSpanked(true),
 	;
+	
+	boolean dailyReset;
+
+	private DialogueFlagValue() {
+		this(false);
+	}
+	
+	private DialogueFlagValue(boolean dailyReset) {
+		this.dailyReset = dailyReset;
+	}
+
+	public boolean isDailyReset() {
+		return dailyReset;
+	}
+	
 }

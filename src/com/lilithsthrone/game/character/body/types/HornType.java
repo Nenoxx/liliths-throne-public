@@ -6,18 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.lilithsthrone.game.character.body.abstractTypes.AbstractHornType;
+import com.lilithsthrone.game.character.race.AbstractRace;
 import com.lilithsthrone.game.character.race.Race;
 import com.lilithsthrone.utils.Util;
 
 /**
  * 
  * @since 0.1.0
- * @version 0.3.1
+ * @version 0.3.9.1
  * @author Innoxia
  */
 public class HornType {
 	
-	//TODO If any more horn types are added, check to see that the potion TFs still work. (5 types is currently the maximum.)
+	// If any more horn types are added, check to see that the potion TFs still work. (5 types is currently the maximum.)
 	
 	public static final AbstractHornType NONE = new AbstractHornType(
 			BodyCoveringType.HORN,
@@ -209,8 +211,8 @@ public class HornType {
 		return allHornTypes;
 	}
 	
-	private static Map<Race, List<AbstractHornType>> typesMap = new HashMap<>();
-	public static List<AbstractHornType> getHornTypes(Race r) {
+	private static Map<AbstractRace, List<AbstractHornType>> typesMap = new HashMap<>();
+	public static List<AbstractHornType> getHornTypes(AbstractRace r) {
 		if(typesMap.containsKey(r)) {
 			return typesMap.get(r);
 		}
@@ -221,10 +223,10 @@ public class HornType {
 				types.add(type);
 			}
 		}
-		typesMap.put(r, types);
 		if(types.isEmpty()) {
 			types.add(HornType.NONE);
 		}
+		typesMap.put(r, types);
 		return types;
 	}
 }

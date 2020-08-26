@@ -517,7 +517,7 @@
 		[pc.speech(I'm sorry, I didn't mean to upset you,)] you say, hearing the sad tone in Lyssieth's voice.
 	</p>
 	<p>
-		[lyssieth.speech(No, it's only fair that you know of my motivation for helping you,)] the elder lilin replies, before continuing, [lyssieth.speech(Anyway, once I came to accept that I'd never get the chance to see him again, I made a promise to his memory that I'd do everything in my power to protect humans. From that day onwards, mother always suspected that my loyalties had shifted, and when I refused to corrupt the archangel she gave to me, she knew for certain that I wasn't to be trusted. After this new reality was created, she gave me one last chance to change my ways, but, ignoring her ultimatum, I continues seeing humans in secret. I just can't resist them...)]
+		[lyssieth.speech(No, it's only fair that you know of my motivation for helping you,)] the elder lilin replies, before continuing, [lyssieth.speech(Anyway, once I came to accept that I'd never get the chance to see him again, I made a promise to his memory that I'd do everything in my power to protect humans. From that day onwards, mother always suspected that my loyalties had shifted, and when I refused to corrupt the archangel she gave to me, she knew for certain that I wasn't to be trusted. After this new reality was created, she gave me one last chance to change my ways, but, ignoring her ultimatum, I continued seeing humans in secret. I just can't resist them...)]
 	</p>
 	<p>
 		[lilaya.speech(And when you fucked Arthur behind my back, Lilith found out and locked you up?)] Lilaya angrily questions.
@@ -1051,7 +1051,13 @@
 	
 	<htmlContent tag="END_FINAL"><![CDATA[
 	<p>
-		Standing up from the sofa, you step over to [siren.namePos] desk and take the offered map. Looking down at the parchment in your [pc.hands], you see that it depicts a large area, measuring 150 square kilometres around Dominion. There looks to be a large amount of farmland surrounding the capital, which is bordered by an expanse of wild grassland and forests. To the north, there's a huge expanse of what's marked as jungle, while to the south, the farmland transitions first into a wide savannah, and then into a desert.
+		Standing up from the sofa, you step over to [siren.namePos] desk and take the offered map. Looking down at the parchment in your [pc.hands], you see that it depicts a large area, with each of the square edges of the map measuring
+		#IF(game.isMetricSizes())
+			 150 kilometres
+		#ELSE
+			 just over 90 miles
+		#ENDIF
+		 in length. There looks to be a large amount of farmland surrounding the capital, which is bordered by an expanse of wild grassland and forests. To the north, there's a huge expanse of what's marked as jungle, while to the south, the farmland transitions first into a wide savannah, and then into a desert.
 	</p>
 	<p>
 		[siren.speech(Elis is here,)] [siren.name] says, pointing to a mark west of Dominion. You look across to see that the town is just a few kilometres to the east of the area marked as the 'Shinrin highlands', and that it looks to be roughly 35km from Dominion itself.

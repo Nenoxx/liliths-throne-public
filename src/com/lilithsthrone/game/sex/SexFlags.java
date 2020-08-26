@@ -1,13 +1,15 @@
 package com.lilithsthrone.game.sex;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.lilithsthrone.game.character.GameCharacter;
 
 /**
  * @since 0.1.69.1
- * @version 0.3.5
+ * @version 0.3.7
  * @author Innoxia
  */
 public class SexFlags {
@@ -18,7 +20,12 @@ public class SexFlags {
 	// Generic:
 	public static boolean mutualOrgasmsAllowed;
 	public static List<GameCharacter> playerPreparedForCharactersOrgasm;
-
+	/** Typically use the key as a flag, and the value for any integer you want associated with the flag. */
+	public static Map<String, Integer> genericFlags;
+	
+	
+	//TODO remove these values and move them into DialogueFlags so that it's all in one place:
+	
 	// Brax: TODO Temporary awaiting Brax rewrite
 	public static boolean braxCumOnChest;
 	
@@ -36,12 +43,15 @@ public class SexFlags {
 	public static boolean claireSexInterrupted;
 	public static int claireSexInterruptedTurn;
 	
-
+	
+	
 	public SexFlags() {
 		reset();
 	}
 	
 	public static void reset() {
+		genericFlags = new HashMap<>();
+		
 		selfActionsBlockedPlayer = false;
 		selfActionsBlockedPartner = false;
 		
